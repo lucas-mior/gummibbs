@@ -9,8 +9,8 @@ template="arch.conf"
 kinds=("manual" "boot" "hour" "day" "week" "month")
 
 for kind in "${kinds[@]}"; do
-    # shellcheck disable=SC2010
-    for snap in $(ls -1 /$snapshots/$kind/); do
+    # shellcheck disable=SC2010,SC2045
+    for snap in $(ls -1 "/$snapshots/$kind/"); do
         snap="$(echo "$snap" | sed -E "s|/$snapshots/$kind/||")"
 
         entry="/boot/loader/entries/$snap.conf"
@@ -56,8 +56,8 @@ savefromboot() {
         done
 
     conf="/boot/$base-$date$ext"
-    cp -v "$current" "$conf"
-    echo "$conf"
+    cp "/boot/$current" "$conf" >/dev/null \
+        && echo "$conf"
 }
 
 while true; do
@@ -78,6 +78,10 @@ fi
 
 linux_conf="$(savefromboot "vmlinuz-$kernel")"
 initrd_conf="$(savefromboot "initramfs-$kernel.img")"
+
+if [ -z "$linux_conf" ] || [ -z "$linux_conf" ]; then
+    echo "Error creating configuration for kernel and initrd"
+fi
 
 # shellcheck disable=SC2001
 kind="$(echo "$kind" | sed 's|/||g')"
