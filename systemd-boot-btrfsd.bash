@@ -26,7 +26,6 @@ done
 
 # delete existing boot entries for missing snapshots
 for entry in /boot/loader/entries/*.conf; do
-    echo "entry=$entry"
     snap="$(echo "$entry" \
             | sed -E -e 's|/boot/loader/entries/||' \
                      -e 's|.conf||')"
