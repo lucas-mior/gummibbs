@@ -45,7 +45,6 @@ savefromboot() {
     current="$1"
     base="$(echo "$current" | sed -E 's/\..+//')"
     ext="$(echo "$current" | sed -E 's/[^.]+(\..+)?/\1/')"
-    conf=""
 
     find /boot/ \
         -regextype egrep \
