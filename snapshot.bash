@@ -29,11 +29,21 @@ mkdir -p "/home/$dir"
 while [ "$(ls -- "$dir" | wc -l)" -gt "$max_of_kind" ]; do
     oldest="$(ls -- "$dir" | sort | head -n 1)"
     btrfs subvol delete "$dir/$oldest"
-    rm "/boot/loader/entries/$oldest.conf"
-    rm "/boot/vmlinuz-linux-$oldest"
-    rm "/boot/vmlinuz-linux-lts-$oldest"
-    rm "/boot/initramfs-linux-$oldest.img"
-    rm "/boot/initramfs-linux-lts-$oldest.img"
+    entry="/boot/loader/entries/$oldest.conf"
+
+    linux_used="$(awk '/linux / {print $NF}' "$entry")"
+    initrd_used="$(awk '/initrd / {print $NF}'"$entry")"
+
+    if [ -n "$linux_used" ]; then
+        grep -FR -- "$linux_used" /boot/loader/entries/ \
+            || rm -f "/boot/$linux_used"
+    fi
+    if [ -n "$initrd_used" ]; then
+        grep -FR -- "$initrd_used" /boot/loader/entries/ \
+            || rm -f "/boot/$initrd_used"
+    fi
+
+    rm -f "$entry"
 done
 
 while [ "$(ls -- "/home/$dir" | wc -l)" -gt "$max_of_kind" ]; do
