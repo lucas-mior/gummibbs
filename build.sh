@@ -12,6 +12,7 @@ DESTDIR="${DESTDIR:-/}"
 program="snapshot.bash"
 program2="systemd-boot-btrfsd.bash"
 service="systemd-boot-btrfsd.service"
+hook="systemctl-pacman.hook"
 
 echo "0$0"
 
@@ -24,5 +25,6 @@ case "$target" in
     install -Dm755 ${program}  ${DESTDIR}${PREFIX}/bin/${program}
     install -Dm755 ${program2} ${DESTDIR}${PREFIX}/bin/${program2}
     install -Dm644 ${service}  ${DESTDIR}${PREFIX}/lib/systemd/system/${service}
+    install -Dm644 ${hook}     ${DESTDIR}${PREFIX}/share/libalpm/hooks/${hook}
     ;;
 esac

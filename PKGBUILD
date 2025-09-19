@@ -13,7 +13,6 @@ provides=("systemd-boot-btrfs-snapshots")
 conflicts=("systemd-boot-btrfs-snapshots")
 source=("git+https://github.com/lucas-mior/systemd-boot-btrfs-snapshots.git")
 md5sums=('SKIP')  # git sources are variable, skip checksum
-install="PKGBUILD.install"
 
 pkgver() {
     cd "$srcdir/${pkgname%-git}"
