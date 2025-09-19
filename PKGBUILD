@@ -1,7 +1,7 @@
 # Maintainer: lucas <lucas.mior.2@gmail.com>
 
 pkgname=systemd-boot-btrfs-snapshots-git
-pkgver=r2.3cd85ac
+pkgver=r5.fe4d72e
 pkgrel=1
 pkgdesc="Btrfs snapshot scripts with systemd-boot integration"
 arch=(x86_64)
@@ -10,7 +10,7 @@ license=(AGPL)
 depends=()
 makedepends=(git)
 provides=("systemd-boot-btrfs-snapshots")
-conflicts=("systemd-boot-btrfs-snapshots")
+conflicts=()
 source=("git+https://github.com/lucas-mior/systemd-boot-btrfs-snapshots.git")
 md5sums=('SKIP')  # git sources are variable, skip checksum
 
