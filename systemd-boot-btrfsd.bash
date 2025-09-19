@@ -54,6 +54,7 @@ savefromboot() {
                 && echo "$file" \
                 && return
         done
+
     conf="/boot/$base-$date$ext"
     cp -v "$current" "$conf"
     echo "$conf"
@@ -77,10 +78,6 @@ fi
 
 linux_conf="$(savefromboot "vmlinuz-$kernel")"
 initrd_conf="$(savefromboot "initramfs-$kernel.img")"
-
-echo "linux_conf===$linux_conf==="
-echo "initrd_conf===$initrd_conf==="
-exit
 
 # shellcheck disable=SC2001
 kind="$(echo "$kind" | sed 's|/||g')"
