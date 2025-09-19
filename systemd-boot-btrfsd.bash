@@ -10,7 +10,7 @@ kinds=("manual" "boot" "hour" "day" "week" "month")
 
 for kind in "${kinds[@]}"; do
     # shellcheck disable=SC2010
-    for snap in "/$snapshots/$kind/"*; do
+    for snap in $(ls -1 /$snapshots/$kind/); do
         snap="$(echo "$snap" | sed -E "s|/$snapshots/$kind/||")"
 
         entry="/boot/loader/entries/$snap.conf"
@@ -34,9 +34,9 @@ for entry in /boot/loader/entries/*.conf; do
         continue
     fi
 
-    match="$(find "/$snapshots/" -maxdepth 2 -name "$snap")"
-    if [ "$(echo "$match" | wc -l)" = "1" ]; then
-        error.sh "$0" "$snap not found"
+    match="$(find "/$snapshots/" -maxdepth 2 -name "$snap" | wc -l)"
+    if [ "$match" = "0" ]; then
+        echo "$snap not found"
         rm -v "$entry"
     fi
 done
