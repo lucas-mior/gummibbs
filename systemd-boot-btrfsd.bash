@@ -1,6 +1,8 @@
 #!/bin/bash
 
-exec > /dev/stderr
+# exec > /dev/stderr
+echo "started $0"
+>&2 echo "started $0"
 
 snapshots="/.snapshots/"
 template="arch.conf"
