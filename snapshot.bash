@@ -31,7 +31,7 @@ while [ "$(ls -- "$dir" | wc -l)" -gt "$max_of_kind" ]; do
     btrfs subvol delete "$dir/$oldest"
     entry="/boot/loader/entries/$oldest.conf"
 
-    linux_used="$(awk '/^linux/ {print $NF}' "$entry")"
+    linux_used="$(awk  '/^linux/  {print $NF}' "$entry")"
     initrd_used="$(awk '/^initrd/ {print $NF}' "$entry")"
 
     if [ -n "$linux_used" ]; then
