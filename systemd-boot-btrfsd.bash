@@ -5,25 +5,6 @@ printf "\n$0\n\n"
 snapshots="/.snapshots/"
 template="arch.conf"
 
-# add missing boot entries for existing snapshots
-kinds=("manual" "boot" "hour" "day" "week" "month")
-
-for kind in "${kinds[@]}"; do
-    # shellcheck disable=SC2010,SC2045
-    for snap in $(ls -1 "/$snapshots/$kind/"); do
-        snap="$(echo "$snap" | sed -E "s|/$snapshots/$kind/||")"
-
-        entry="/boot/loader/entries/$snap.conf"
-        if [ ! -e "$entry" ]; then
-            sed -E -e "s|^title .+|title $kind/$snap|" \
-                   -e "s|subvol=@|subvol=@/$snapshots/$kind/$snap|" \
-                   -e "s|//+|/|g" \
-                "/boot/loader/entries/$template" \
-                | tee "$entry"
-        fi
-    done
-done
-
 # delete existing boot entries for missing snapshots
 for entry in /boot/loader/entries/*.conf; do
     snap="$(echo "$entry" \
