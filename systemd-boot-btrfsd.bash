@@ -45,18 +45,17 @@ savefromboot() {
     base="$(echo "$current" | sed -E 's/\..+//')"
     ext="$(echo "$current" | sed -E 's/[^.]+(\..+)?/\1/')"
 
-    find /boot/ \
-        -regextype egrep \
-        -iregex "/boot/$base-.*" 2>&1 \
-        | while read -r file; do
-            diff "$file" "$current" >/dev/null 2>&1 \
-                && echo "$file" \
-                && return
-        done
+    for file in /boot/$base-*; do
+        [ -e "$file" ] || continue
+        if diff "$file" "/boot/$current" >/dev/null 2>&1; then
+            echo "$file"
+            return 0
+        fi
+    done
 
-    conf="/boot/$base-$date$ext"
-    cp "/boot/$current" "$conf" >/dev/null \
-        && echo "$conf"
+    conf="$base-$snap$ext"
+    cp -f "/boot/$current" "/boot/$conf" >/dev/null \
+        && echo "/boot/$conf"
 }
 
 while true; do
@@ -75,8 +74,8 @@ else
     kernel="linux"
 fi
 
-linux_conf="$(savefromboot "vmlinuz-$kernel")"
-initrd_conf="$(savefromboot "initramfs-$kernel.img")"
+linux_conf="$(savefromboot "vmlinuz-$kernel" | sed 's|/boot/||')"
+initrd_conf="$(savefromboot "initramfs-$kernel.img" | sed 's|/boot/||')"
 
 if [ -z "$linux_conf" ] || [ -z "$linux_conf" ]; then
     echo "Error creating configuration for kernel and initrd"
@@ -89,8 +88,8 @@ kind="$(echo "$kind" | sed 's|/||g')"
 sed -E \
     -e "s|^title .+|title   $kind/$date|;" \
     -e "s|subvol=@|subvol=@/$snapshots/$kind/$date|" \
-    -e "s|^linux .+/vmlinuz-linux.*|linux $linux_conf|" \
-    -e "s|^initrd .+/initramfs-linux.*\.img$|initrd $initrd_conf|" \
+    -e "s|^linux .+/vmlinuz-linux.*|linux /$linux_conf|" \
+    -e "s|^initrd .+/initramfs-linux.*\.img$|initrd /$initrd_conf|" \
     -e "s|//+|/|g" \
     "/boot/loader/entries/$template" \
     | tee "/boot/loader/entries/$date.conf"
