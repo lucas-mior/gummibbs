@@ -80,6 +80,7 @@ initrd_conf="$(savefromboot "initramfs-$kernel.img")"
 
 if [ -z "$linux_conf" ] || [ -z "$linux_conf" ]; then
     echo "Error creating configuration for kernel and initrd"
+    continue
 fi
 
 # shellcheck disable=SC2001
