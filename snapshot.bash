@@ -44,12 +44,3 @@ done
 date="$(date +"%Y%m%d_%H%M%S")"
 btrfs subvolume snapshot /     "/$snapshots/$kind/$date"
 btrfs subvolume snapshot /home "/home/$snapshots/$kind/$date"
-
-if uname -r | grep -q -- "-lts$"; then
-    kernel="linux-lts"
-else
-    kernel="linux"
-fi
-
-cp -v "/boot/vmlinuz-$kernel"       "/boot/vmlinuz-$kernel-$date"
-cp -v "/boot/initramfs-$kernel.img" "/boot/initramfs-$kernel-$date.img"
