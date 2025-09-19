@@ -19,7 +19,9 @@ echo "0$0"
 case "$target" in
 "uninstall")
     rm -f ${DESTDIR}${PREFIX}/bin/${program}
-    rm -f ${DESTDIR}${PREFIX}/bin/${program}
+    rm -f ${DESTDIR}${PREFIX}/bin/${program2}
+    rm -f ${DESTDIR}${PREFIX}/lib/systemd/system/${service}
+    rm -f ${DESTDIR}${PREFIX}/share/libalpm/hooks/${hook}
     ;;
 "install")
     install -Dm755 ${program}  ${DESTDIR}${PREFIX}/bin/${program}
