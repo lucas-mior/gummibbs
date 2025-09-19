@@ -35,7 +35,7 @@ for entry in /boot/loader/entries/*.conf; do
     fi
 
     match="$(find "/$snapshots/" -maxdepth 2 -name "$snap")"
-    if [ "$(echo "$match" | wc -l)" = "0" ]; then
+    if [ "$(echo "$match" | wc -l)" = "1" ]; then
         error.sh "$0" "$snap not found"
         rm -v "$entry"
     fi
@@ -82,12 +82,12 @@ initrd_conf="$(savefromboot "initramfs-$kernel.img")"
 # shellcheck disable=SC2001
 kind="$(echo "$kind" | sed 's|/||g')"
 
-    sed -E \
-        -e "s|^title .+|title   $kind/$date|;" \
-        -e "s|subvol=@|subvol=@/$snapshots/$kind/$date|" \
-        -e "s|^linux .+/vmlinuz-linux.*|linux $linux_conf|" \
-        -e "s|^initrd .+/initramfs-linux.*\.img$|initrd $initrd_conf|" \
-        -e "s|//+|/|g" \
-        "/boot/loader/entries/$template" \
-        | tee "/boot/loader/entries/$date.conf"
+sed -E \
+    -e "s|^title .+|title   $kind/$date|;" \
+    -e "s|subvol=@|subvol=@/$snapshots/$kind/$date|" \
+    -e "s|^linux .+/vmlinuz-linux.*|linux $linux_conf|" \
+    -e "s|^initrd .+/initramfs-linux.*\.img$|initrd $initrd_conf|" \
+    -e "s|//+|/|g" \
+    "/boot/loader/entries/$template" \
+    | tee "/boot/loader/entries/$date.conf"
 done
