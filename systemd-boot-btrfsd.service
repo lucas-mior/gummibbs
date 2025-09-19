@@ -1,0 +1,13 @@
+[Unit]
+Description=Create entries for btrfs snapshots as they are created
+
+[Service]
+Type=simple
+LogLevelMax=notice
+
+Environment="PATH=/sbin:/bin:/usr/sbin:/usr/bin"
+
+ExecStart=/usr/local/bin/systemd-boot-btrfsd.bash
+
+[Install]
+WantedBy=multi-user.target
