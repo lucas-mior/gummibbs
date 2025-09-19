@@ -1,5 +1,7 @@
 #!/bin/bash
 
+exec > >(tee "/dev/stderr")
+
 snapshots="/.snapshots/"
 template="arch.conf"
 
