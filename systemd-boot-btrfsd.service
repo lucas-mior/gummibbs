@@ -7,7 +7,7 @@ LogLevelMax=notice
 
 Environment="PATH=/sbin:/bin:/usr/sbin:/usr/bin"
 
-ExecStart=/usr/local/bin/systemd-boot-btrfsd.bash
+ExecStart=/usr/bin/systemd-boot-btrfsd.bash
 
 [Install]
 WantedBy=multi-user.target
