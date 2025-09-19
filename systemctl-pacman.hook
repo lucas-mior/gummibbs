@@ -1,0 +1,10 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = systemd-boot-btrfs-snapshots
+
+[Action]
+Description = Enabling systemd-boot-btrfs-snapshots after installing mypackage
+When = PostTransaction
+Exec = /usr/bin/systemctl enable --now systemd-boot-btrfsd.service
