@@ -3,7 +3,8 @@ Description=Create entries for btrfs snapshots as they are created
 
 [Service]
 Type=simple
-LogLevelMax=notice
+StandardOutput=journal+console
+StandardError=journal+console
 
 Environment="PATH=/sbin:/bin:/usr/sbin:/usr/bin"
 
