@@ -5,6 +5,6 @@ Type = Package
 Target = systemd-boot-btrfs-snapshots
 
 [Action]
-Description = Enabling systemd-boot-btrfs-snapshots after installing mypackage
+Description = Enabling systemd-boot-btrfs-snapshotd
 When = PostTransaction
 Exec = /usr/bin/systemctl enable --now systemd-boot-btrfsd.service
