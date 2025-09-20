@@ -17,7 +17,8 @@ generally work since the kernel/initramfs expected by your restored root file
 system is another. So, the `systemd-boot-btrfsd.bash` script also copies the
 running kernel and initramfs with the matching name and creates the
 corresponding `.conf` boot entry. This implies you must have some spare space
-in `/boot`.
+in `/boot`. But don't worry, if another copy already matches the running kernel,
+only the entry will be adjusted, no extra copies needed.
 
 ## Installation
 ```sh
