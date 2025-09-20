@@ -55,7 +55,7 @@ else
     kernel="linux"
 fi
 
-linux_conf="$(savefromboot  "vmlinuz-$kernel" | sed 's|/boot/||')"
+linux_conf="$(savefromboot  "vmlinuz-$kernel"       | sed 's|/boot/||')"
 initrd_conf="$(savefromboot "initramfs-$kernel.img" | sed 's|/boot/||')"
 
 if [ -z "$linux_conf" ] || [ -z "$initrd_conf" ]; then
