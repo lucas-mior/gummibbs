@@ -14,6 +14,11 @@ snapshots=".snapshots"
 
 dir="/$snapshots/$kind"
 
+if sudo btrfs subvol show / | head -n 1 | grep -q -- "$snapshots"; then
+    echo "$(basename "$0"):" "Snapshot mounted. Exiting..."
+    exit 1
+fi
+
 case $kind in
     "manual") max_of_kind=12 ;;
     "boot")   max_of_kind=4  ;;
