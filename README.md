@@ -18,7 +18,11 @@ system is another. So, the `systemd-boot-btrfsd.bash` script also copies the
 running kernel and initramfs with the matching name and creates the
 corresponding `.conf` boot entry. This implies you must have some spare space
 in `/boot`. But don't worry, if another copy already matches the running kernel,
-only the entry will be adjusted, no extra copies needed.
+only the entry will be adjusted, no extra copies needed. All this means that you
+*will* be able to boot into your system as it was months ago. Of course,
+except for other partitions/subvolumes you have used along the way.
+Consider adding `nofail` option to non critical partitions/subvolumes in
+`/etc/fstab` to avoid surprises.
 
 ## Installation
 ```sh
