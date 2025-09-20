@@ -26,13 +26,19 @@ Consider adding `nofail` option to non critical partitions/subvolumes in
 
 ## Installation
 ```sh
+# clone repository
 git clone https://github.com/lucas-mior/systemd-boot-btrfs-snapshots
 cd systemd-boot-btrfs-snapshots
 
+# install
 sudo ./build install
 sudo systemctl enable --now systemd-boot-btrfsd.service
+
+# start making snapshots
+sudo snapshot.bash manual
 ```
 
 ## Configuration
 You may want to set the number of entries kept for each snapshot interval type,
-look at `snapshot.bash`.
+look at `snapshot.bash`. Look at crontab.example as a possible way to configure
+automatic snapshots.
