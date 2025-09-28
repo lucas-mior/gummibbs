@@ -183,8 +183,8 @@ while [ -e "$lock" ]; do
     sleep 10
 done
 
-touch "$lock"
 trap cleanup EXIT
+touch "$lock"
 
 kernel="$(uname -r)"
 if echo "$kernel" | grep -q -- "-lts$"; then
