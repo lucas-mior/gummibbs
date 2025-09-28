@@ -69,8 +69,10 @@ savefrom() {
     ext="$(echo "$current" | sed -E 's/[^.]+(\..+)?/\1/')"
 
     # shellcheck disable=SC2231
-    for file in $dir/$base-*; do
-        [ -e "$file" ] || continue
+    for file in "$dir"/"$base"-*; do
+        if [ ! -e "$file" ]; then
+            continue
+        fi
         if diff "$file" "/boot/$current" >/dev/null 2>&1; then
             printf "$file\n"
             return 0
@@ -100,14 +102,14 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         kernel_type="linux-lts"
     elif echo "$kernel" | grep -q -- "-hardened$"; then
         kernel_type="linux-hardened"
-        echo "snapshot $snapshot used linux-hardened which is not supported."
+        error "snapshot $snapshot used linux-hardened which is not supported."
         exit 1
     elif echo "$kernel" | grep -q -- "-zen$"; then
         kernel_type="linux-zen"
     elif echo "$kernel" | grep -q -- "-arch"; then
         kernel_type="linux"
     else
-        echo "Unknown kernel type $kernel"
+        error "Unknown kernel type $kernel"
         exit 1
     fi
 
@@ -121,13 +123,13 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         -r "$snapshot" \
         --kernel "$kernel" \
         --generate "/tmp/boot/initramfs-$kernel_type.img"; then
-        echo "Error generating initramfs using snapshotted mkinitcpio"
+        error "Error generating initramfs using snapshotted mkinitcpio"
     fi
     if ! "$snapshot/usr/bin/booster" \
         -c "$snapshot/etc/booster.yaml" \
         -p "$snapshot/usr/lib/modules/$kernel" \
         -o "/tmp/boot/initramfs-$kernel_type.img"; then
-        echo "Error generating initramfs using snapshotted booster"
+        error "Error generating initramfs using snapshotted booster"
     fi
     set +x
 
@@ -136,7 +138,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     initrd_conf_booster="$(savefrom    /tmp/boot "booster-$kernel_type.img")"
 
     if [ -z "$initrd_conf_mkinitcpio" ] && [ -z "$initrd_conf_booster" ]; then
-        echo "Error generating initramfs: both mkinitcpio and booster failed."
+        error "Error generating initramfs: both mkinitcpio and booster failed."
         exit 1
     fi
 
@@ -145,7 +147,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     initrd_conf_booster="$(echo "$initrd_conf_booster" | sed 's|/boot/||')"
 
     if [ -z "$linux_conf" ]; then
-        echo "Error creating configuration for snapshotted kernel."
+        error "Error creating configuration for snapshotted kernel."
         exit 1
     fi
 
