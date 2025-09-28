@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck disable=SC2317,SC2001
+# shellcheck disable=SC2317,SC2001,SC2181
 printf "\n$0\n\n"
 
 error () {
@@ -73,6 +73,11 @@ savefrom() {
     current="$2"
     base="$(echo "$current" | sed -E 's/\..+//')"
     ext="$(echo "$current" | sed -E 's/[^.]+(\..+)?/\1/')"
+
+    if [ -z "$snapdate" ]; then
+        error "\$snapdate must be set"
+        exit 1
+    fi
 
     # shellcheck disable=SC2231
     for file in "$dir"/"$base"-*; do
