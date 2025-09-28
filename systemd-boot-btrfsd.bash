@@ -3,9 +3,18 @@
 printf "\n$0\n\n"
 
 export LC_ALL=C
-
 snapshots="/.snapshots/"
-template="arch.conf"
+
+if btrfs subvol show / | head -n 1 | grep -q -- "$snapshots"; then
+    echo "$(basename "$0"):" "Snapshot mounted. Exiting..."
+    exit 1
+fi
+
+template="$(bootctl | awk '/Current Entry:/ {print $NF}')"
+if [ ! -e "/boot/loader/entries/$template" ]; then
+    echo "template boot entry '$template' does not exist"
+    exit 1
+fi
 
 # delete existing boot entries for missing snapshots
 for entry in /boot/loader/entries/*.conf; do
@@ -40,6 +49,25 @@ for entry in /boot/loader/entries/*.conf; do
     done
 done
 
+# add missing boot entries for existing snapshots
+kinds=("manual" "boot" "hour" "day" "week" "month")
+
+for kind in "${kinds[@]}"; do
+    # shellcheck disable=SC2010,SC2045
+    for snap in $(ls -1 "/$snapshots/$kind/"); do
+        snap="$(echo "$snap" | sed -E "s|/$snapshots/$kind/||")"
+
+        entry="/boot/loader/entries/$snap.conf"
+        if [ ! -e "$entry" ]; then
+            sed -E -e "s|^title .+|title $kind/$snap|" \
+                   -e "s|subvol=@|subvol=@/$snapshots/$kind/$snap|" \
+                   -e "s|//+|/|g" \
+                "/boot/loader/entries/$template" \
+                | tee "$entry"
+        fi
+    done
+done
+
 savefromboot() {
     current="$1"
     base="$(echo "$current" | sed -E 's/\..+//')"
@@ -54,7 +82,7 @@ savefromboot() {
         fi
     done
 
-    conf="$base-$date$ext"
+    conf="${base}-${snapdate}${ext}"
     cp -f "/boot/$current" "/boot/$conf" >/dev/null \
         && printf "/boot/$conf\n"
 }
@@ -65,7 +93,7 @@ snap="$(inotifywait -e create \
         | awk -v snapshots="$snapshots" \
           '{printf("%s,%s\n", gensub(snapshots, "", "g", $1), $NF)}')"
 
-IFS="," read -r kind date <<END
+IFS="," read -r kind snapdate <<END
 $snap
 END
 
@@ -95,11 +123,12 @@ fi
 kind="$(echo "$kind" | sed 's|/||g')"
 
 sed -E \
-    -e "s|^title .+|title   $kind/$date|;" \
-    -e "s|subvol=@|subvol=@/$snapshots/$kind/$date|" \
+    -e "s|^title .+|title   $kind/$snapdate|;" \
+    -e "s|subvol=@|subvol=@/$snapshots/$kind/$snapdate|" \
     -e "s|^linux .+/vmlinuz-linux.*|linux /$linux_conf|" \
     -e "s|^initrd .+/initramfs-linux.*\.img$|initrd /$initrd_conf|" \
+    -e "s|^initrd .+/booster-linux.*\.img$|initrd /$initrd_conf|" \
     -e "s|//+|/|g" \
     "/boot/loader/entries/$template" \
-    | tee "/boot/loader/entries/$date.conf"
+    | tee "/boot/loader/entries/$snapdate.conf"
 done
