@@ -140,17 +140,17 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     set +x
 
     linux_conf="$(savefrom             /tmp/boot "vmlinuz-$kernel_type")"
-    initrd_conf_mkinitcpio="$(savefrom /tmp/boot "initramfs-$kernel_type.img")"
-    initrd_conf_booster="$(savefrom    /tmp/boot "booster-$kernel_type.img")"
+    initrd_conf_mkinitcpio_mkinitcpio="$(savefrom /tmp/boot "initramfs-$kernel_type.img")"
+    initrd_conf_mkinitcpio_booster="$(savefrom    /tmp/boot "booster-$kernel_type.img")"
 
-    if [ -z "$initrd_conf_mkinitcpio" ] && [ -z "$initrd_conf_booster" ]; then
+    if [ -z "$initrd_conf_mkinitcpio_mkinitcpio" ] && [ -z "$initrd_conf_mkinitcpio_booster" ]; then
         error "Error generating initramfs: both mkinitcpio and booster failed."
         exit 1
     fi
 
     linux_conf="$(echo "$linux_conf" | sed 's|/boot/||')"
-    initrd_conf_mkinitcpio="$(echo "$initrd_conf_mkinitcpio" | sed 's|/boot/||')"
-    initrd_conf_booster="$(echo "$initrd_conf_booster" | sed 's|/boot/||')"
+    initrd_conf_mkinitcpio_mkinitcpio="$(echo "$initrd_conf_mkinitcpio_mkinitcpio" | sed 's|/boot/||')"
+    initrd_conf_mkinitcpio_booster="$(echo "$initrd_conf_mkinitcpio_booster" | sed 's|/boot/||')"
 
     if [ -z "$linux_conf" ]; then
         error "Error creating configuration for snapshotted kernel."
@@ -160,15 +160,15 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     sed -E -e "s|^title .+|title $kind/$snap|" \
            -e "s|subvol=@|subvol=@/.snapshots/$kind/$snap|" \
            -e "s|^linux .+/vmlinuz-linux.*|linux /$linux_conf|" \
-           -e "s|^initrd .+/initramfs-linux.*\.img$|initrd /$initrd_conf_mkinitcpio|" \
-           -e "s|^initrd .+/booster-linux.*\.img$|initrd /$initrd_conf_booster|" \
+           -e "s|^initrd .+/initramfs-linux.*\.img$|initrd /$initrd_conf_mkinitcpio_mkinitcpio|" \
+           -e "s|^initrd .+/booster-linux.*\.img$|initrd /$initrd_conf_mkinitcpio_booster|" \
            -e "s|//+|/|g" \
         "/boot/loader/entries/$template" \
         | tee "$entry"
 
 done
 
-unset kind snap snapshot linux_conf initrd_conf_mkinitcpio initrd_conf_booster
+unset kind snap snapshot linux_conf initrd_conf_mkinitcpio_mkinitcpio initrd_conf_mkinitcpio_booster
 
 while true; do
 snap="$(inotifywait -e create \
@@ -201,16 +201,18 @@ else
     kernel_type="linux"
 fi
 
-linux_conf="$(savefrom  /boot "vmlinuz-$kernel_type"       | sed 's|/boot/||')"
-initrd_conf="$(savefrom /boot "initramfs-$kernel_type.img" | sed 's|/boot/||')"
+linux_conf="$(savefrom /boot "vmlinuz-$kernel_type" | sed 's|/boot/||')"
 
-if [ -z "$initrd_conf" ]; then
-    error "Trying to get booster initrd..."
-    initrd_conf="$(savefrom /boot "booster-$kernel_type.img" | sed 's|/boot/||')"
+initrd_conf_mkinitcpio="$(savefrom /boot "initramfs-$kernel_type.img" | sed 's|/boot/||')"
+initrd_conf_booster="$(savefrom    /boot "booster-$kernel_type.img" | sed 's|/boot/||')"
+
+if [ -z "$initrd_conf_mkinitcpio" ] && [ -z "$initrd_conf_booster" ]; then
+    error "Error generating initramfs: both mkinitcpio and booster failed."
+    exit 1
 fi
 
-if [ -z "$linux_conf" ] || [ -z "$initrd_conf" ]; then
-    error "Error creating configuration for kernel and initrd"
+if [ -z "$linux_conf" ]; then
+    error "Error creating configuration for kernel."
     continue
 fi
 
@@ -221,8 +223,8 @@ sed -E \
     -e "s|^title .+|title   $kind/$snapdate|;" \
     -e "s|subvol=@|subvol=@/$snapshots/$kind/$snapdate|" \
     -e "s|^linux .+/vmlinuz-linux.*|linux /$linux_conf|" \
-    -e "s|^initrd .+/initramfs-linux.*\.img$|initrd /$initrd_conf|" \
-    -e "s|^initrd .+/booster-linux.*\.img$|initrd /$initrd_conf|" \
+    -e "s|^initrd .+/initramfs-linux.*\.img$|initrd /$initrd_conf_mkinitcpio|" \
+    -e "s|^initrd .+/booster-linux.*\.img$|initrd /$initrd_conf_booster|" \
     -e "s|//+|/|g" \
     "/boot/loader/entries/$template" \
     | tee "/boot/loader/entries/$snapdate.conf"
