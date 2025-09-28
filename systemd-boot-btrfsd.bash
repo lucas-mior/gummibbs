@@ -80,6 +80,12 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
 | while read -r snapshot; do
     snap=$(echo "$snapshot" | awk -F'/' '{print $NF}')
     kind=$(echo "$snapshot" | awk -F'/' '{print $(NF-1)}')
+    entry="/boot/loader/entries/$snap.conf"
+
+    if [ -e "$entry" ]; then
+        echo "$entry already exists"
+        continue
+    fi
 
     # shellcheck disable=SC2012
     kernel="$(ls -1t "$snapshot/usr/lib/modules" | head -n 1)"
@@ -88,14 +94,14 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     elif echo "$kernel" | grep -q -- "-hardened$"; then
         kernel_type="linux-hardened"
         echo "snapshot $snapshot used linux-hardened which is not supported."
-        continue
+        exit
     elif echo "$kernel" | grep -q -- "-zen$"; then
         kernel_type="linux-zen"
     elif echo "$kernel" | grep -q -- "-arch"; then
         kernel_type="linux"
     else
         echo "Unknown kernel type $kernel"
-        continue
+        exit
     fi
 
     mkdir -p /tmp/boot
@@ -116,17 +122,11 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     linux_conf="$(savefrom  /tmp/boot "vmlinuz-$kernel_type"       | sed 's|/boot/||')"
     initrd_conf="$(savefrom /tmp/boot "initramfs-$kernel_type.img" | sed 's|/boot/||')"
 
-    if [ -z "$initrd_conf" ]; then
-        echo "Trying to get booster initrd..."
-        initrd_conf="$(savefrom /tmp/boot "booster-$kernel_type.img" | sed 's|/boot/||')"
-    fi
-
     if [ -z "$linux_conf" ] || [ -z "$initrd_conf" ]; then
         echo "Error creating configuration for kernel and initrd"
         exit 1
     fi
 
-    entry="/boot/loader/entries/$snap.conf"
     sed -E -e "s|^title .+|title $kind/$snap|" \
            -e "s|subvol=@|subvol=@/.snapshots/$kind/$snap|" \
            -e "s|^linux .+/vmlinuz-linux.*|linux /$linux_conf|" \
