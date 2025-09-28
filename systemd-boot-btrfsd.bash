@@ -16,6 +16,12 @@ if [ ! -e "/boot/loader/entries/$template" ]; then
     exit 1
 fi
 
+template2="$(awk '/default/ {print $NF}' "/boot/loader/loader.conf")"
+if [ "$template2" != "$template" ]; then
+    echo "Default boot option ($template2) is not the booted one ($template)"
+    exit 1
+fi
+
 # delete existing boot entries for missing snapshots
 for entry in /boot/loader/entries/*.conf; do
     snap="$(echo "$entry" \
