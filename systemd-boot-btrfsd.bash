@@ -109,6 +109,10 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
 done
 
 # pacman -S linux-lts --noconfirm
+lock="/var/lib/pacman/db.lck"
+cleanup() {
+    rm -v "$lock"
+}
 
 while true; do
 snap="$(inotifywait -e create \
@@ -120,15 +124,11 @@ IFS="," read -r kind snapdate <<END
 $snap
 END
 
-lock="/var/lib/pacman/db.lck"
 while [ -e "$lock" ]; do
     echo "$lock exists. You can't run this script while pacman is running."
     sleep 10
 done
 
-cleanup() {
-    rm -v "$lock"
-}
 touch "$lock"
 trap cleanup EXIT
 
