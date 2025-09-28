@@ -115,26 +115,39 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         -r "$snapshot" \
         --kernel "$kernel" \
         --generate "/tmp/boot/initramfs-$kernel_type.img"; then
-        echo "Error generating snapshotted initramfs using mkinitcpio"
-        exit 1
+        echo "Error generating initramfs using snapshotted mkinitcpio"
+    fi
+    if ! "$snapshot/usr/bin/booster" \
+        -c "$snapshot/etc/booster.yaml" \
+        -p "$snapshot/usr/lib/modules/$kernel" \
+        -o "/tmp/boot/initramfs-$kernel_type.img"; then
+        echo "Error generating initramfs using snapshotted booster"
     fi
     set +x
 
-    linux_conf="$(savefrom  /tmp/boot "vmlinuz-$kernel_type")"
-    initrd_conf="$(savefrom /tmp/boot "initramfs-$kernel_type.img")"
+    linux_conf="$(savefrom             /tmp/boot "vmlinuz-$kernel_type")"
+    initrd_conf_mkinitcpio="$(savefrom /tmp/boot "initramfs-$kernel_type.img")"
+    initrd_conf_booster="$(savefrom    /tmp/boot "booster-$kernel_type.img")"
+
+    if [ -z "$initrd_conf_mkinitcpio" ] && [ -z "$initrd_conf_booster" ]; then
+        echo "Error generating initramfs: both mkinitcpio and booster failed."
+        exit 1
+    fi
 
     linux_conf="$(echo "$linux_conf" | sed 's|/boot/||')"
-    initrd_conf="$(echo "$initrd_conf" | sed 's|/boot/||')"
+    initrd_conf_mkinitcpio="$(echo "$initrd_conf_mkinitcpio" | sed 's|/boot/||')"
+    initrd_conf_booster="$(echo "$initrd_conf_booster" | sed 's|/boot/||')"
 
-    if [ -z "$linux_conf" ] || [ -z "$initrd_conf" ]; then
-        echo "Error creating configuration for kernel and initrd"
+    if [ -z "$linux_conf" ]; then
+        echo "Error creating configuration for snapshotted kernel."
         exit 1
     fi
 
     sed -E -e "s|^title .+|title $kind/$snap|" \
            -e "s|subvol=@|subvol=@/.snapshots/$kind/$snap|" \
            -e "s|^linux .+/vmlinuz-linux.*|linux /$linux_conf|" \
-           -e "s|^initrd .+/initramfs-linux.*\.img$|initrd /$initrd_conf|" \
+           -e "s|^initrd .+/initramfs-linux.*\.img$|initrd /$initrd_conf_mkinitcpio|" \
+           -e "s|^initrd .+/booster-linux.*\.img$|initrd /$initrd_conf_booster|" \
            -e "s|//+|/|g" \
         "/boot/loader/entries/$template" \
         | tee "$entry"
