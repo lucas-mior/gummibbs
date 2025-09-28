@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2317,SC2001
 printf "\n$0\n\n"
 
 export LC_ALL=C
@@ -120,8 +120,11 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     fi
     set +x
 
-    linux_conf="$(savefrom  /tmp/boot "vmlinuz-$kernel_type"       | sed 's|/boot/||')"
-    initrd_conf="$(savefrom /tmp/boot "initramfs-$kernel_type.img" | sed 's|/boot/||')"
+    linux_conf="$(savefrom  /tmp/boot "vmlinuz-$kernel_type")"
+    initrd_conf="$(savefrom /tmp/boot "initramfs-$kernel_type.img")"
+
+    linux_conf="$(echo "$linux_conf" | sed 's|/boot/||')"
+    initrd_conf="$(echo "$initrd_conf" | sed 's|/boot/||')"
 
     if [ -z "$linux_conf" ] || [ -z "$initrd_conf" ]; then
         echo "Error creating configuration for kernel and initrd"
