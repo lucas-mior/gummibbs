@@ -55,13 +55,14 @@ for entry in /boot/loader/entries/*.conf; do
     done
 done
 
-savefromboot() {
-    current="$1"
+savefrom() {
+    dir="$1"
+    current="$2"
     base="$(echo "$current" | sed -E 's/\..+//')"
     ext="$(echo "$current" | sed -E 's/[^.]+(\..+)?/\1/')"
 
     # shellcheck disable=SC2231
-    for file in /boot/$base-*; do
+    for file in $dir/$base-*; do
         [ -e "$file" ] || continue
         if diff "$file" "/boot/$current" >/dev/null 2>&1; then
             printf "$file\n"
@@ -70,7 +71,7 @@ savefromboot() {
     done
 
     conf="${base}-${snapdate}${ext}"
-    cp -f "/boot/$current" "/boot/$conf" >/dev/null \
+    cp -f "$dir/$current" "/boot/$conf" >/dev/null \
         && printf "/boot/$conf\n"
 }
 
@@ -123,18 +124,25 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         continue
     fi
 
-    if ! bsdtar -xvf "$file" -C /tmp boot/vmlinuz* boot/initramfs*; then
+    mkdir -p /tmp/boot
+
+    if ! bsdtar -xvf "$file" -C /tmp/boot boot/vmlinuz* boot/initramfs* boot/booster*; then
         echo "Failed to extract $file"
         rm -f "$file"
         continue
     fi
 
-    rm -f "$file"
+    linux_conf="$(savefrom /tmp/boot "vmlinuz-$kernel_type"        | sed 's|/boot/||')"
+    initrd_conf="$(savefrom /tmp/boot "initramfs-$kernel_type.img" | sed 's|/boot/||')"
+
+    if [ -z "$initrd_conf" ]; then
+        echo "Trying to get booster initrd..."
+        initrd_conf="$(savefrom "booster-$kernel_type.img" | sed 's|/boot/||')"
+    fi
+
 done
 exit
 
-#         linux_conf="$(savefromboot "vmlinuz-linux" | sed 's|/boot/||')"
-#         initrd_conf="$(savefromboot "initramfs-linux.img" | sed 's|/boot/||')"
 
 #         if [ -z "$linux_conf" ] || [ -z "$initrd_conf" ]; then
 #             echo "Error creating configuration for kernel and initrd"
@@ -191,12 +199,12 @@ else
     kernel_type="linux"
 fi
 
-linux_conf="$(savefromboot  "vmlinuz-$kernel_type"       | sed 's|/boot/||')"
-initrd_conf="$(savefromboot "initramfs-$kernel_type.img" | sed 's|/boot/||')"
+linux_conf="$(savefrom  /boot "vmlinuz-$kernel_type"       | sed 's|/boot/||')"
+initrd_conf="$(savefrom /boot "initramfs-$kernel_type.img" | sed 's|/boot/||')"
 
 if [ -z "$initrd_conf" ]; then
     echo "Trying to get booster initrd..."
-    initrd_conf="$(savefromboot "booster-$kernel_type.img" | sed 's|/boot/||')"
+    initrd_conf="$(savefrom /boot "booster-$kernel_type.img" | sed 's|/boot/||')"
 fi
 
 if [ -z "$linux_conf" ] || [ -z "$initrd_conf" ]; then
