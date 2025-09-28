@@ -135,9 +135,9 @@ trap cleanup EXIT
 kernel="$(uname -r)"
 if echo "$kernel" | grep -q -- "-lts$"; then
     kernel="linux-lts"
-elif echo "$kernel" | grep -q "-hardened$"; then
+elif echo "$kernel" | grep -q -- "-hardened$"; then
     kernel="linux-hardened"
-elif echo "$kernel" | grep -q "-zen$"; then
+elif echo "$kernel" | grep -q -- "-zen$"; then
     kernel="linux-zen"
 else
     kernel="linux"
