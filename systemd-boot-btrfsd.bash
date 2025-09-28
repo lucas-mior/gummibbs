@@ -62,6 +62,12 @@ for entry in /boot/loader/entries/*.conf; do
     done
 done
 
+lock="/var/lib/pacman/db.lck"
+cleanup() {
+    rm -v "$lock"
+    rm -rf /tmp/boot
+}
+
 savefrom() {
     dir="$1"
     current="$2"
@@ -161,11 +167,6 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         | tee "$entry"
 
 done
-
-lock="/var/lib/pacman/db.lck"
-cleanup() {
-    rm -v "$lock"
-}
 
 while true; do
 snap="$(inotifywait -e create \
