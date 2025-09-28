@@ -3,27 +3,33 @@
 # shellcheck disable=SC2317,SC2001
 printf "\n$0\n\n"
 
+error () {
+    script="$(basename "$0")"
+    message="$1"
+    >&2 echo "${script}: $message"
+}
+
 export LC_ALL=C
 snapshots="/.snapshots/"
 
 if btrfs subvol show / | head -n 1 | grep -q -- "$snapshots"; then
-    echo "$(basename "$0"):" "Snapshot mounted. Exiting..."
+    error "Snapshot mounted. Exiting..."
     exit 1
 fi
 
 template="$(bootctl | awk '/Current Entry:/ {print $NF}')"
 if [ ! -e "/boot/loader/entries/$template" ]; then
-    echo "template boot entry '$template' does not exist"
+    error "template boot entry '$template' does not exist"
     exit 1
 fi
 
 template2="$(awk '/default/ {print $NF}' "/boot/loader/loader.conf")"
 if [ "$template2" != "$template" ]; then
-    echo "Default boot option ($template2) is not the booted one ($template)"
+    error "Default boot option ($template2) is not the booted one ($template)"
     exit 1
 fi
 
-# delete existing boot entries for missing snapshots
+error "Deleting boot entries with inexistent snapshots or kernels or initrds"
 for entry in /boot/loader/entries/*.conf; do
     snap="$(echo "$entry" \
             | sed -E -e 's|/boot/loader/entries/||' \
@@ -34,14 +40,14 @@ for entry in /boot/loader/entries/*.conf; do
 
     match="$(find "/$snapshots/" -maxdepth 2 -name "$snap" | wc -l)"
     if [ "$match" = "0" ]; then
-        printf "$snap not found\n"
+        error "$snap not found\n"
         rm -v "$entry"
         continue
     fi
 
     linux="$(awk '/^linux/{printf("%s/%s\n", "/boot", $NF);}' "$entry")"
     if [ ! -e "$linux" ]; then
-        printf "referenced kernel $linux no longer exists."
+        error "Referenced kernel $linux no longer exists. Deleting entry..."
         rm -v "$entry"
         continue
     fi
@@ -49,7 +55,7 @@ for entry in /boot/loader/entries/*.conf; do
     initrds="$(awk '/^initrd/{printf("%s/%s\n", "/boot", $NF);}' "$entry")"
     for initrd in $initrds; do
         if [ ! -e "$initrd" ]; then
-            printf "referenced initrd $initrd no longer exists."
+            error "Referenced initrd $initrd no longer exists. Deleting entry..."
             rm -v "$entry"
             continue
         fi
@@ -76,7 +82,7 @@ savefrom() {
         && printf "/boot/$conf\n"
 }
 
-# add missing entries for existing snapshots
+error "Generating boot entries for existing snapshots..."
 find /.snapshots/ -mindepth 2 -maxdepth 2 \
 | while read -r snapshot; do
     snap=$(echo "$snapshot" | awk -F'/' '{print $NF}')
