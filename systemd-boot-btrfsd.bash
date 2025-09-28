@@ -2,6 +2,8 @@
 
 printf "\n$0\n\n"
 
+export LC_ALL=C
+
 snapshots="/.snapshots/"
 template="arch.conf"
 
@@ -67,14 +69,22 @@ IFS="," read -r kind date <<END
 $snap
 END
 
-if uname -r | grep -q -- "-lts$"; then
+kernel="$(uname -r)"
+if echo "$kernel" | grep -q -- "-lts$"; then
     kernel="linux-lts"
+elif echo "$kernel" | grep -q "-hardened$"; then
+    kernel="linux-hardened"
 else
     kernel="linux"
 fi
 
 linux_conf="$(savefromboot  "vmlinuz-$kernel"       | sed 's|/boot/||')"
 initrd_conf="$(savefromboot "initramfs-$kernel.img" | sed 's|/boot/||')"
+
+if [ -z "$initrd_conf" ]; then
+    echo "Trying to get booster initrd..."
+    initrd_conf="$(savefromboot "booster-$kernel.img" | sed 's|/boot/||')"
+fi
 
 if [ -z "$linux_conf" ] || [ -z "$initrd_conf" ]; then
     echo "Error creating configuration for kernel and initrd"
