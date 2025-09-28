@@ -96,70 +96,33 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         continue
     fi
 
-    version="$(echo "$kernel" | sed -E 's/-(lts|zen)$//g')"
-
-    case "$kernel_type" in
-        "linux")     pkg="linux/linux-$version-x86_64.pkg.tar"         ;;
-        "linux-zen") pkg="linux-zen/linux-$version-x86_64.pkg.tar"     ;;
-        "linux-lts") pkg="linux-lts/linux-lts-$version-x86_64.pkg.tar" ;;
-    esac
-
-    file=""
-    for ext in zst xz; do
-        url="https://archive.archlinux.org/packages/l/$pkg.$ext"
-        echo "url=$url"
-        sig="$url.sig"
-        wget -q "$url" && wget -q "$sig" \
-            && file="$(basename "$pkg").$ext"
-    done
-
-    if [ -z "$file" ]; then
-        echo "Failed to download package for $kernel"
-        continue
-    fi
-
-    if ! gpg --verify "$file.sig" "$file"; then
-        echo "Signature verification failed for $file"
-        rm -f "$file" "$file.sig"
-        continue
-    fi
-
     mkdir -p /tmp/boot
-
-    if ! bsdtar -xvf "$file" -C /tmp/boot boot/vmlinuz* boot/initramfs* boot/booster*; then
-        echo "Failed to extract $file"
-        rm -f "$file"
-        continue
-    fi
+    cp "$snapshot/usr/lib/modules/$kernel/vmlinuz" /tmp/boot
 
     linux_conf="$(savefrom /tmp/boot "vmlinuz-$kernel_type"        | sed 's|/boot/||')"
     initrd_conf="$(savefrom /tmp/boot "initramfs-$kernel_type.img" | sed 's|/boot/||')"
 
+    echo "linux-conf=$linux_conf"
+    echo "initrd-conf=$initrd_conf"
+
     if [ -z "$initrd_conf" ]; then
         echo "Trying to get booster initrd..."
-        initrd_conf="$(savefrom "booster-$kernel_type.img" | sed 's|/boot/||')"
+        initrd_conf="$(savefrom /tmp/boot "booster-$kernel_type.img" | sed 's|/boot/||')"
     fi
+    if [ -z "$linux_conf" ] || [ -z "$initrd_conf" ]; then
+        echo "Error creating configuration for kernel and initrd"
+        continue
+    fi
+    entry="/boot/loader/entries/$snap.conf"
+    sed -E -e "s|^title .+|title $kind/$snap|" \
+           -e "s|subvol=@|subvol=@/.snapshots/$kind/$snap|" \
+           -e "s|^linux .+/vmlinuz-linux.*|linux /$linux_conf|" \
+           -e "s|^initrd .+/initramfs-linux.*\.img$|initrd /$initrd_conf|" \
+           -e "s|//+|/|g" \
+        "/boot/loader/entries/$template" \
+        | tee "$entry"
 
 done
-exit
-
-
-#         if [ -z "$linux_conf" ] || [ -z "$initrd_conf" ]; then
-#             echo "Error creating configuration for kernel and initrd"
-#             continue
-#         fi
-
-#         entry="/boot/loader/entries/$snap.conf"
-#         sed -E -e "s|^title .+|title $kind/$snap|" \
-#                -e "s|subvol=@|subvol=@/.snapshots/$kind/$snap|" \
-#                -e "s|^linux .+/vmlinuz-linux.*|linux /$linux_conf|" \
-#                -e "s|^initrd .+/initramfs-linux.*\.img$|initrd /$initrd_conf|" \
-#                -e "s|//+|/|g" \
-#             "/boot/loader/entries/$template" \
-#             | tee "$entry"
-#     else
-#         echo "$snap has no kernel"
-#     fi
 exit
 
 # pacman -S linux-lts --noconfirm
