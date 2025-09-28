@@ -68,10 +68,11 @@ savefromboot() {
         && printf "/boot/$conf\n"
 }
 
-# find /.snapshots/ -mindepth 2 -maxdepth 2 \
-# | while read -r snapshot; do
-#     snap=$(echo "$snapshot" | awk -F'/' '{print $NF}')
-#     kind=$(echo "$snapshot" | awk -F'/' '{print $(NF-1)}')
+find /.snapshots/ -mindepth 2 -maxdepth 2 \
+| while read -r snapshot; do
+    snap=$(echo "$snapshot" | awk -F'/' '{print $NF}')
+    kind=$(echo "$snapshot" | awk -F'/' '{print $(NF-1)}')
+    echo "getkernel $kind/$snap"
 
 #     if ls -1 "$snapshot/usr/lib/modules" | grep -q -- "-arch"; then
 #         kernel="$(ls -1 "$snapshot/usr/lib/modules" | grep -- "-arch")"
@@ -104,7 +105,8 @@ savefromboot() {
 #     else
 #         echo "$snap has no kernel"
 #     fi
-# done
+done
+exit
 
 # pacman -S linux-lts --noconfirm
 
