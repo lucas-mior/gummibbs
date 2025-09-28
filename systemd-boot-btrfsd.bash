@@ -74,8 +74,8 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     kind=$(echo "$snapshot" | awk -F'/' '{print $(NF-1)}')
     echo "getkernel $kind/$snap"
 
-    kernel="$(
-    if ls -1 "$snapshot/usr/lib/modules" | grep -q -- "-arch"; then
+    # kernel="$(
+    # if ls -1 "$snapshot/usr/lib/modules" | grep -q -- "-arch"; then
 #         kernel="$(ls -1 "$snapshot/usr/lib/modules" | grep -- "-arch")"
 #         name="$(echo "$kernel" | sed 's/-arch/.arch/')"
 #         down="linux-$name-x86_64.pkg.tar.zst"
@@ -107,7 +107,6 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
 #         echo "$snap has no kernel"
 #     fi
 done
-exit
 
 # pacman -S linux-lts --noconfirm
 
@@ -120,6 +119,18 @@ snap="$(inotifywait -e create \
 IFS="," read -r kind snapdate <<END
 $snap
 END
+
+lock="/var/lib/pacman/db.lck"
+while [ -e "$lock" ]; do
+    echo "$lock exists. You can't run this script while pacman is running."
+    sleep 10
+done
+
+cleanup() {
+    rm -v "$lock"
+}
+touch "$lock"
+trap cleanup EXIT
 
 kernel="$(uname -r)"
 if echo "$kernel" | grep -q -- "-lts$"; then

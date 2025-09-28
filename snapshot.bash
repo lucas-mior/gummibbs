@@ -9,7 +9,7 @@ fi
 
 kind="$1"
 snapshots=".snapshots"
-lock=/var/lib/pacman/db.lck
+lock="/var/lib/pacman/db.lck"
 
 dir="/$snapshots/$kind"
 
