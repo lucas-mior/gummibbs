@@ -171,8 +171,12 @@ done
 unset kind snap snapshot linux_conf initrd_conf_mkinitcpio_mkinitcpio initrd_conf_mkinitcpio_booster
 
 while true; do
-snap="$(inotifywait -e create \
-        "/$snapshots/"{manual,boot,hour,day,week,month} \
+snap="$(inotifywait -e create "/$snapshots/"{manual,boot,hour,day,week,month})"
+if [ $? != 0 ] || [ -z "$snap" ]; then
+    error "Error in inotifywait."
+    exit 1
+fi
+snap="$(echo "$snap" \
         | awk -v snapshots="$snapshots" \
           '{printf("%s,%s\n", gensub(snapshots, "", "g", $1), $NF)}')"
 
