@@ -97,7 +97,16 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     fi
 
     mkdir -p /tmp/boot
-    cp "$snapshot/usr/lib/modules/$kernel/vmlinuz" /tmp/boot
+    cp -v "$snapshot/usr/lib/modules/$kernel/vmlinuz" /tmp/boot
+
+    if ! $snapshot/usr/bin/mkinitcpio \
+        --kernel "/tmp/boot/vmlinuz" \
+        --generatedir /tmp/boot \
+        --config "$snapshot/etc/mkinitcpio.conf" \
+        --generate /tmp/boot/initramfs-$kernel_type.img; then
+        echo "mkinitcpio failed."
+        exit 1
+    fi
 
     linux_conf="$(savefrom /tmp/boot "vmlinuz-$kernel_type"        | sed 's|/boot/||')"
     initrd_conf="$(savefrom /tmp/boot "initramfs-$kernel_type.img" | sed 's|/boot/||')"
