@@ -9,6 +9,7 @@ fi
 
 kind="$1"
 snapshots=".snapshots"
+lock=/var/lib/pacman/db.lck
 
 dir="/$snapshots/$kind"
 
@@ -16,6 +17,17 @@ if btrfs subvol show / | head -n 1 | grep -q -- "$snapshots"; then
     echo "$(basename "$0"):" "Snapshot mounted. Exiting..."
     exit 1
 fi
+
+if [ -e "$lock" ]; then
+    echo "$lock exists. You can't run this script while pacman is running."
+    exit 1
+fi
+
+cleanup() {
+    rm -v "$lock"
+}
+touch "$lock"
+trap cleanup EXIT
 
 case $kind in
     "manual") max_of_kind=12 ;;

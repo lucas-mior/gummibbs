@@ -74,7 +74,8 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     kind=$(echo "$snapshot" | awk -F'/' '{print $(NF-1)}')
     echo "getkernel $kind/$snap"
 
-#     if ls -1 "$snapshot/usr/lib/modules" | grep -q -- "-arch"; then
+    kernel="$(
+    if ls -1 "$snapshot/usr/lib/modules" | grep -q -- "-arch"; then
 #         kernel="$(ls -1 "$snapshot/usr/lib/modules" | grep -- "-arch")"
 #         name="$(echo "$kernel" | sed 's/-arch/.arch/')"
 #         down="linux-$name-x86_64.pkg.tar.zst"
