@@ -16,7 +16,7 @@ for entry in /boot/loader/entries/*.conf; do
 
     match="$(find "/$snapshots/" -maxdepth 2 -name "$snap" | wc -l)"
     if [ "$match" = "0" ]; then
-        echo "$snap not found"
+        printf "$snap not found\n"
         rm -v "$entry"
     fi
 done
@@ -26,17 +26,18 @@ savefromboot() {
     base="$(echo "$current" | sed -E 's/\..+//')"
     ext="$(echo "$current" | sed -E 's/[^.]+(\..+)?/\1/')"
 
+    # shellcheck disable=SC2231
     for file in /boot/$base-*; do
         [ -e "$file" ] || continue
         if diff "$file" "/boot/$current" >/dev/null 2>&1; then
-            echo "$file"
+            printf "$file\n"
             return 0
         fi
     done
 
     conf="$base-$date$ext"
     cp -f "/boot/$current" "/boot/$conf" >/dev/null \
-        && echo "/boot/$conf"
+        && printf "/boot/$conf\n"
 }
 
 while true; do
