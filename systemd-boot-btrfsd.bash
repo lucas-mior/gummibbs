@@ -10,7 +10,7 @@ for entry in /boot/loader/entries/*.conf; do
     snap="$(echo "$entry" \
             | sed -E -e 's|/boot/loader/entries/||' \
                      -e 's|.conf||')"
-    if echo "$snap" | grep -qv "^[0-9]\{8\}_[0-9]\{6\}"; then
+    if echo "$snap" | grep -qv "^[0-9]\{8\}_[0-9]\{6\}.conf$"; then
         continue
     fi
 
