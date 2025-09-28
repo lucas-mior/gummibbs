@@ -83,7 +83,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     entry="/boot/loader/entries/$snap.conf"
 
     if [ -e "$entry" ]; then
-        echo "$entry already exists"
+        echo "$entry already exists."
         continue
     fi
 
@@ -94,14 +94,14 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     elif echo "$kernel" | grep -q -- "-hardened$"; then
         kernel_type="linux-hardened"
         echo "snapshot $snapshot used linux-hardened which is not supported."
-        exit
+        exit 1
     elif echo "$kernel" | grep -q -- "-zen$"; then
         kernel_type="linux-zen"
     elif echo "$kernel" | grep -q -- "-arch"; then
         kernel_type="linux"
     else
         echo "Unknown kernel type $kernel"
-        exit
+        exit 1
     fi
 
     mkdir -p /tmp/boot
@@ -114,7 +114,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         -r "$snapshot" \
         --kernel "$kernel" \
         --generate "/tmp/boot/initramfs-$kernel_type.img"; then
-        echo "mkinitcpio failed."
+        echo "Error generating snapshotted initramfs using mkinitcpio"
         exit 1
     fi
     set +x
@@ -136,9 +136,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         | tee "$entry"
 
 done
-exit
 
-# pacman -S linux-lts --noconfirm
 lock="/var/lib/pacman/db.lck"
 cleanup() {
     rm -v "$lock"
