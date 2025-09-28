@@ -76,6 +76,7 @@ savefrom() {
         && printf "/boot/$conf\n"
 }
 
+# add missing entries for existing snapshots
 find /.snapshots/ -mindepth 2 -maxdepth 2 \
 | while read -r snapshot; do
     snap=$(echo "$snapshot" | awk -F'/' '{print $NF}')
