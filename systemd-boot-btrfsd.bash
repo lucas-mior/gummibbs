@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# shellcheck disable=SC2317
 printf "\n$0\n\n"
 
 export LC_ALL=C
@@ -80,6 +81,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     snap=$(echo "$snapshot" | awk -F'/' '{print $NF}')
     kind=$(echo "$snapshot" | awk -F'/' '{print $(NF-1)}')
 
+    # shellcheck disable=SC2012
     kernel="$(ls -1t "$snapshot/usr/lib/modules" | head -n 1)"
     if echo "$kernel" | grep -q -- "-lts$"; then
         kernel_type="linux-lts"
@@ -97,31 +99,33 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     fi
 
     mkdir -p /tmp/boot
-    cp -v "$snapshot/usr/lib/modules/$kernel/vmlinuz" /tmp/boot
+    cp -v "$snapshot/usr/lib/modules/$kernel/vmlinuz" \
+          "/tmp/boot/vmlinuz-$kernel_type"
 
-    if ! $snapshot/usr/bin/mkinitcpio \
-        --kernel "/tmp/boot/vmlinuz" \
-        --generatedir /tmp/boot \
+    set -x
+    if ! "$snapshot/usr/bin/mkinitcpio" \
         --config "$snapshot/etc/mkinitcpio.conf" \
-        --generate /tmp/boot/initramfs-$kernel_type.img; then
+        -r "$snapshot" \
+        --kernel "$kernel" \
+        --generate "/tmp/boot/initramfs-$kernel_type.img"; then
         echo "mkinitcpio failed."
         exit 1
     fi
+    set +x
 
-    linux_conf="$(savefrom /tmp/boot "vmlinuz-$kernel_type"        | sed 's|/boot/||')"
+    linux_conf="$(savefrom  /tmp/boot "vmlinuz-$kernel_type"       | sed 's|/boot/||')"
     initrd_conf="$(savefrom /tmp/boot "initramfs-$kernel_type.img" | sed 's|/boot/||')"
-
-    echo "linux-conf=$linux_conf"
-    echo "initrd-conf=$initrd_conf"
 
     if [ -z "$initrd_conf" ]; then
         echo "Trying to get booster initrd..."
         initrd_conf="$(savefrom /tmp/boot "booster-$kernel_type.img" | sed 's|/boot/||')"
     fi
+
     if [ -z "$linux_conf" ] || [ -z "$initrd_conf" ]; then
         echo "Error creating configuration for kernel and initrd"
-        continue
+        exit 1
     fi
+
     entry="/boot/loader/entries/$snap.conf"
     sed -E -e "s|^title .+|title $kind/$snap|" \
            -e "s|subvol=@|subvol=@/.snapshots/$kind/$snap|" \
