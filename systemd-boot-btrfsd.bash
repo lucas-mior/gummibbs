@@ -178,7 +178,7 @@ $snap
 END
 
 while [ -e "$lock" ]; do
-    echo "$lock exists. You can't run this script while pacman is running."
+    error "$lock exists. You can't run this script while pacman is running."
     sleep 10
 done
 
@@ -190,7 +190,7 @@ if echo "$kernel" | grep -q -- "-lts$"; then
     kernel_type="linux-lts"
 elif echo "$kernel" | grep -q -- "-hardened$"; then
     kernel_type="linux-hardened"
-    echo "$0:" "linux-hardened not supported"
+    error "linux-hardened not supported"
     exit 1
 elif echo "$kernel" | grep -q -- "-zen$"; then
     kernel_type="linux-zen"
@@ -202,12 +202,12 @@ linux_conf="$(savefrom  /boot "vmlinuz-$kernel_type"       | sed 's|/boot/||')"
 initrd_conf="$(savefrom /boot "initramfs-$kernel_type.img" | sed 's|/boot/||')"
 
 if [ -z "$initrd_conf" ]; then
-    echo "Trying to get booster initrd..."
+    error "Trying to get booster initrd..."
     initrd_conf="$(savefrom /boot "booster-$kernel_type.img" | sed 's|/boot/||')"
 fi
 
 if [ -z "$linux_conf" ] || [ -z "$initrd_conf" ]; then
-    echo "Error creating configuration for kernel and initrd"
+    error "Error creating configuration for kernel and initrd"
     continue
 fi
 
