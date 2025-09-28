@@ -78,20 +78,60 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
 | while read -r snapshot; do
     snap=$(echo "$snapshot" | awk -F'/' '{print $NF}')
     kind=$(echo "$snapshot" | awk -F'/' '{print $(NF-1)}')
-    echo "getkernel $kind/$snap"
 
-    # kernel="$(
-    # if ls -1 "$snapshot/usr/lib/modules" | grep -q -- "-arch"; then
-#         kernel="$(ls -1 "$snapshot/usr/lib/modules" | grep -- "-arch")"
-#         name="$(echo "$kernel" | sed 's/-arch/.arch/')"
-#         down="linux-$name-x86_64.pkg.tar.zst"
-#         down2="linux-$name-x86_64.pkg.tar.xz"
-#         url="https://archive.archlinux.org/packages/l/linux"
-#         echo "down=$down"
+    kernel="$(ls -1t "$snapshot/usr/lib/modules" | head -n 1)"
+    if echo "$kernel" | grep -q -- "-lts$"; then
+        kernel_type="linux-lts"
+    elif echo "$kernel" | grep -q -- "-hardened$"; then
+        kernel_type="linux-hardened"
+        echo "snapshot $snapshot used linux-hardened which is not supported."
+        continue
+    elif echo "$kernel" | grep -q -- "-zen$"; then
+        kernel_type="linux-zen"
+    elif echo "$kernel" | grep -q -- "-arch"; then
+        kernel_type="linux"
+    else
+        echo "Unknown kernel type $kernel"
+        continue
+    fi
 
-#         pacman -U "$url/$down" --noconfirm --needed \
-#             || pacman -U "$url/$down2" --noconfirm --needed \
-#             || continue
+    version="$(echo "$kernel" | sed -E 's/-(lts|zen)$//g')"
+
+    case "$kernel_type" in
+        "linux")     pkg="linux/linux-$version-x86_64.pkg.tar"         ;;
+        "linux-zen") pkg="linux-zen/linux-$version-x86_64.pkg.tar"     ;;
+        "linux-lts") pkg="linux-lts/linux-lts-$version-x86_64.pkg.tar" ;;
+    esac
+
+    file=""
+    for ext in zst xz; do
+        url="https://archive.archlinux.org/packages/l/$pkg.$ext"
+        echo "url=$url"
+        sig="$url.sig"
+        wget -q "$url" && wget -q "$sig" \
+            && file="$(basename "$pkg").$ext"
+    done
+
+    if [ -z "$file" ]; then
+        echo "Failed to download package for $kernel"
+        continue
+    fi
+
+    if ! gpg --verify "$file.sig" "$file"; then
+        echo "Signature verification failed for $file"
+        rm -f "$file" "$file.sig"
+        continue
+    fi
+
+    if ! bsdtar -xvf "$file" -C /tmp boot/vmlinuz* boot/initramfs*; then
+        echo "Failed to extract $file"
+        rm -f "$file"
+        continue
+    fi
+
+    rm -f "$file"
+done
+exit
 
 #         linux_conf="$(savefromboot "vmlinuz-linux" | sed 's|/boot/||')"
 #         initrd_conf="$(savefromboot "initramfs-linux.img" | sed 's|/boot/||')"
@@ -112,7 +152,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
 #     else
 #         echo "$snap has no kernel"
 #     fi
-done
+exit
 
 # pacman -S linux-lts --noconfirm
 lock="/var/lib/pacman/db.lck"
@@ -140,21 +180,23 @@ trap cleanup EXIT
 
 kernel="$(uname -r)"
 if echo "$kernel" | grep -q -- "-lts$"; then
-    kernel="linux-lts"
+    kernel_type="linux-lts"
 elif echo "$kernel" | grep -q -- "-hardened$"; then
-    kernel="linux-hardened"
+    kernel_type="linux-hardened"
+    echo "$0:" "linux-hardened not supported"
+    exit 1
 elif echo "$kernel" | grep -q -- "-zen$"; then
-    kernel="linux-zen"
+    kernel_type="linux-zen"
 else
-    kernel="linux"
+    kernel_type="linux"
 fi
 
-linux_conf="$(savefromboot  "vmlinuz-$kernel"       | sed 's|/boot/||')"
-initrd_conf="$(savefromboot "initramfs-$kernel.img" | sed 's|/boot/||')"
+linux_conf="$(savefromboot  "vmlinuz-$kernel_type"       | sed 's|/boot/||')"
+initrd_conf="$(savefromboot "initramfs-$kernel_type.img" | sed 's|/boot/||')"
 
 if [ -z "$initrd_conf" ]; then
     echo "Trying to get booster initrd..."
-    initrd_conf="$(savefromboot "booster-$kernel.img" | sed 's|/boot/||')"
+    initrd_conf="$(savefromboot "booster-$kernel_type.img" | sed 's|/boot/||')"
 fi
 
 if [ -z "$linux_conf" ] || [ -z "$initrd_conf" ]; then
