@@ -10,7 +10,7 @@ for entry in /boot/loader/entries/*.conf; do
     snap="$(echo "$entry" \
             | sed -E -e 's|/boot/loader/entries/||' \
                      -e 's|.conf||')"
-    if echo "$snap" | grep -qv "^[0-9]\{8\}_[0-9]\{6\}.conf$"; then
+    if echo "$snap" | grep -qv "^[0-9]\{8\}_[0-9]\{6\}"; then
         continue
     fi
 
@@ -18,7 +18,24 @@ for entry in /boot/loader/entries/*.conf; do
     if [ "$match" = "0" ]; then
         printf "$snap not found\n"
         rm -v "$entry"
+        continue
     fi
+
+    linux="$(awk '/^linux/{printf("%s/%s\n", "/boot", $NF);}' "$entry")"
+    if [ ! -e "$linux" ]; then
+        printf "referenced kernel $linux no longer exists."
+        rm -v "$entry"
+        continue
+    fi
+
+    initrds="$(awk '/^initrd/{printf("%s/%s\n", "/boot", $NF);}' "$entry")"
+    for initrd in $initrds; do
+        if [ ! -e "$initrd" ]; then
+            printf "referenced initrd $initrd no longer exists."
+            rm -v "$entry"
+            continue
+        fi
+    done
 done
 
 savefromboot() {
