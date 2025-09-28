@@ -90,7 +90,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     entry="/boot/loader/entries/$snap.conf"
 
     if [ -e "$entry" ]; then
-        echo "$entry already exists."
+        error "$entry already exists."
         continue
     fi
 
