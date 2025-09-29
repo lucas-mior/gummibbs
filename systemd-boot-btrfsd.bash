@@ -160,9 +160,9 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
           "/tmp/$script/vmlinuz-$kernel_type"
 
     snapdate=$snap
-    linux=$(savefrom             "/tmp/$script/vmlinuz-$kernel_type")
+    linux=$(savefrom "/tmp/$script/vmlinuz-$kernel_type")
 
-    linux=$(echo "$linux"                         | sed 's|/boot/||')
+    linux=$(echo "$linux" | sed 's|/boot/||')
 
     if [ -z "$linux" ]; then
         error "Error creating configuration for snapshotted kernel.\n"
