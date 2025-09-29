@@ -231,7 +231,7 @@ END
 sleep 2
 n=0
 while [ -e "$lock" ]; do
-    error "$lock exists. You can't run this script while pacman is running.\n"
+    error "$lock exists. Trying again in 5 seconds..."
     sleep 5
     n=$((n+1))
     if [ $n -gt 12 ]; then
