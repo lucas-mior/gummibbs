@@ -96,28 +96,27 @@ cleanup() {
 }
 
 savefrom() {
-    dir=$1
-    current=$2
-    base=$(echo "$current" | sed -E 's/\..+//')
-    ext=$(echo "$current" | sed -E 's/[^.]+(\..+)?/\1/')
+    current=$1
+    base=$(basename "$current" | sed -E 's/\..+//')
+    ext=$(basename "$current" | sed -E 's/[^.]+(\..+)?/\1/')
 
     if [ -z "$snapdate" ]; then
         error "\$snapdate must be set.\n"
         exit 1
     fi
 
-    for file in "$dir"/"$base"-*; do
+    for file in /boot/"$base"-*; do
         if [ ! -e "$file" ]; then
             continue
         fi
-        if diff "$file" "/boot/$current" >/dev/null 2>&1; then
+        if diff "$file" "$current" >/dev/null 2>&1; then
             printf "$file\n"
             return 0
         fi
     done
 
     conf="${base}-${snapdate}${ext}"
-    cp -f "$dir/$current" "/boot/$conf" >/dev/null \
+    cp -f "$current" "/boot/$conf" >/dev/null \
         && printf "/boot/$conf\n"
 }
 
@@ -174,9 +173,9 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     set +x
 
     snapdate=$snap
-    linux=$(savefrom             "/tmp/$script" "vmlinuz-$kernel_type")
-    initrd_mkinitcpio=$(savefrom "/tmp/$script" "initramfs-$kernel_type.img")
-    initrd_booster=$(savefrom    "/tmp/$script" "booster-$kernel_type.img")
+    linux=$(savefrom             "/tmp/$script/vmlinuz-$kernel_type")
+    initrd_mkinitcpio=$(savefrom "/tmp/$script/initramfs-$kernel_type.img")
+    initrd_booster=$(savefrom    "/tmp/$script/booster-$kernel_type.img")
 
     if [ -z "$initrd_mkinitcpio" ] && [ -z "$initrd_booster" ]; then
         error "Error generating initramfs:"
@@ -249,9 +248,9 @@ else
     exit $fatal_error
 fi
 
-linux=$(savefrom             /boot "vmlinuz-$kernel_type")
-initrd_mkinitcpio=$(savefrom /boot "initramfs-$kernel_type.img")
-initrd_booster=$(savefrom    /boot "booster-$kernel_type.img")
+linux=$(savefrom             "/boot/vmlinuz-$kernel_type")
+initrd_mkinitcpio=$(savefrom "/boot/initramfs-$kernel_type.img")
+initrd_booster=$(savefrom    "/boot/booster-$kernel_type.img")
 
 if [ -z "$initrd_mkinitcpio" ] && [ -z "$initrd_booster" ]; then
     error "Error creating configuration for initramfs.\n"
