@@ -105,6 +105,11 @@ savefrom() {
         exit 1
     fi
 
+    if [ ! -s "$current" ]; then
+        error "$current is empty."
+        return 0
+    fi
+
     for file in /boot/"$base"-*; do
         if [ ! -e "$file" ]; then
             continue
