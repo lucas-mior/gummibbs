@@ -159,38 +159,10 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     cp -v "$snapshot/lib/modules/$kernel/vmlinuz" \
           "/tmp/$script/vmlinuz-$kernel_type"
 
-    set -x
-    if ! "$snapshot/bin/mkinitcpio" \
-        --config      "$snapshot/etc/mkinitcpio.conf" \
-        --moduleroot  "$snapshot" \
-        --kernel      "$kernel" \
-        --generate    "/tmp/$script/initramfs-$kernel_type.img"; then
-        set +x
-        error "Error generating initramfs using snapshotted mkinitcpio.\n"
-    fi
-    if ! "$snapshot/bin/booster" build \
-        --config "$snapshot/etc/booster.yaml" \
-        --kernel-version "$snapshot/lib/modules/$kernel" \
-        "/tmp/$script/initramfs-$kernel_type.img"; then
-        set +x
-        error "Error generating initramfs using snapshotted booster.\n"
-    fi
-    set +x
-
     snapdate=$snap
     linux=$(savefrom             "/tmp/$script/vmlinuz-$kernel_type")
-    initrd_mkinitcpio=$(savefrom "/tmp/$script/initramfs-$kernel_type.img")
-    initrd_booster=$(savefrom    "/tmp/$script/booster-$kernel_type.img")
-
-    if [ -z "$initrd_mkinitcpio" ] && [ -z "$initrd_booster" ]; then
-        error "Error generating initramfs:"
-        error " both mkinitcpio and booster failed.\n"
-        continue
-    fi
 
     linux=$(echo "$linux"                         | sed 's|/boot/||')
-    initrd_mkinitcpio=$(echo "$initrd_mkinitcpio" | sed 's|/boot/||')
-    initrd_booster=$(echo "$initrd_booster"       | sed 's|/boot/||')
 
     if [ -z "$linux" ]; then
         error "Error creating configuration for snapshotted kernel.\n"
@@ -200,8 +172,6 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     sed -E -e "s|^title .+|title $kind/$snap|" \
            -e "s|subvol=$subvol|subvol=$subvol/.snapshots/$kind/$snap|" \
            -e "s|^linux .+/vmlinuz-linux.*|linux /$linux|" \
-           -e "s|^initrd .+/initramfs-.*\.img$|initrd /$initrd_mkinitcpio|" \
-           -e "s|^initrd .+/booster-.*\.img$|initrd /$initrd_booster|" \
            -e "s|//+|/|g" \
         "/boot/loader/entries/$template" \
         | tee "$entry"
