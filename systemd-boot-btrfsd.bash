@@ -175,8 +175,8 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     sed -E -e "s|^title .+|title $kind/$snap|" \
            -e "s|subvol=$subvol|subvol=$subvol/.snapshots/$kind/$snap|" \
            -e "s|^linux .+/vmlinuz-linux.*|linux /$linux|" \
-           -e "s|^initrd .+/initramfs-linux.*\.img$|initrd /$initrd_mkinitcpio|" \
-           -e "s|^initrd .+/booster-linux.*\.img$|initrd /$initrd_booster|" \
+           -e "s|^initrd .+/initramfs-.*\.img$|initrd /$initrd_mkinitcpio|" \
+           -e "s|^initrd .+/booster-.*\.img$|initrd /$initrd_booster|" \
            -e "s|//+|/|g" \
         "/boot/loader/entries/$template" \
         | tee "$entry"
