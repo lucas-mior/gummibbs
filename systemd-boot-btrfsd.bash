@@ -183,7 +183,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
 
 done
 
-unset kind snap snapshot linux initrd_mkinitcpio_mkinitcpio initrd_mkinitcpio_booster
+unset kind snap snapshot linux initrd_mkinitcpio initrd_booster
 
 while true; do
 snap=$(inotifywait -e create "/$snapshots/"{manual,boot,hour,day,week,month})
