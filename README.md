@@ -40,8 +40,9 @@ sudo snapshot.bash manual
 
 ## Configuration
 You may want to set the number of entries kept for each snapshot interval type,
-look at `snapshot.bash`. Look at crontab.example as a possible way to configure
-automatic snapshots.
+look at `snapshot.bash`. Look at `crontab.example` as a possible way to
+configure automatic snapshots.
+
 Make sure that your default boot entry is correctly configured. An example
 is given (`entry_example.conf`). The important part is that
 `rootflags=subvol=$SUBVOLNAME` is correct.
