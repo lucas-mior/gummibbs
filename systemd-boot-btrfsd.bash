@@ -4,6 +4,7 @@
 
 printf "\n$0\n\n"
 script=$(basename "$0")
+subvol=$(btrfs subvol show / | awk '/Name:/{print $NF}')
 
 error () {
     >&2 echo "$1"
@@ -14,6 +15,11 @@ snapshots="/.snapshots/"
 
 if btrfs subvol show / | head -n 1 | grep -q -- "$snapshots"; then
     error "Snapshot mounted. Exiting..."
+    exit 1
+fi
+
+if echo "$subvol" | grep -q "^[0-9]\{8\}_[0-9]\{6\}"; then
+    error "Subvolume name matches date format. Exiting..."
     exit 1
 fi
 
@@ -167,7 +173,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     fi
 
     sed -E -e "s|^title .+|title $kind/$snap|" \
-           -e "s|subvol=@|subvol=@/.snapshots/$kind/$snap|" \
+           -e "s|subvol=$subvol|subvol=$subvol/.snapshots/$kind/$snap|" \
            -e "s|^linux .+/vmlinuz-linux.*|linux /$linux|" \
            -e "s|^initrd .+/initramfs-linux.*\.img$|initrd /$initrd_mkinitcpio|" \
            -e "s|^initrd .+/booster-linux.*\.img$|initrd /$initrd_booster|" \
@@ -233,7 +239,7 @@ kind="$(echo "$kind" | sed 's|/||g')"
 
 sed -E \
     -e "s|^title .+|title   $kind/$snapdate|;" \
-    -e "s|subvol=@|subvol=@/$snapshots/$kind/$snapdate|" \
+    -e "s|subvol=$subvol|subvol=$subvol/$snapshots/$kind/$snapdate|" \
     -e "s|^linux .+/vmlinuz-linux.*|linux /$linux|" \
     -e "s|^initrd .+/initramfs-linux.*\.img$|initrd /$initrd_mkinitcpio|" \
     -e "s|^initrd .+/booster-linux.*\.img$|initrd /$initrd_booster|" \
