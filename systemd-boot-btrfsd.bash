@@ -50,8 +50,8 @@ if [ "$template2" != "$template" ]; then
     exit 1
 fi
 
-subvol2=$(sed -n '/rootflags/{s/.*subvol=\([^ ,;]*\).*/\1/p}' \
-                 "/boot/loader/entries/$template")
+subvol2=$(sed -En '/rootflags/{s/.*subvol=([^ ,;]*).*/\1/p}' \
+                  "/boot/loader/entries/$template")
 
 if [ "$subvol" != "$subvol2" ]; then
     error "Root subvolume ($subvol)"
