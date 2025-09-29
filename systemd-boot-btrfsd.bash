@@ -4,7 +4,6 @@
 
 printf "\n$0\n\n"
 script=$(basename "$0")
-subvol=$(btrfs subvol show / | awk '/Name:/{print $NF}')
 
 error () {
     >&2 printf "$@"
@@ -18,6 +17,7 @@ if btrfs subvol show / | head -n 1 | grep -q -- "$snapshots"; then
     exit 1
 fi
 
+subvol=$(btrfs subvol show / | awk '/Name:/{print $NF}')
 if echo "$subvol" | grep -q "^[0-9]\{8\}_[0-9]\{6\}"; then
     error "Subvolume name matches date format. Exiting...\n"
     exit 1
