@@ -247,8 +247,11 @@ elif echo "$kernel" | grep -Eq -- "-hardened$"; then
     kernel_type="linux-hardened"
 elif echo "$kernel" | grep -Eq -- "-zen$"; then
     kernel_type="linux-zen"
-else
+elif echo "$kernel" | grep -Eq -- "-arch"; then
     kernel_type="linux"
+else
+    error "Unknown kernel type $kernel.\n"
+    exit 2
 fi
 
 linux=$(savefrom             /boot "vmlinuz-$kernel_type")
