@@ -228,9 +228,16 @@ IFS="," read -r kind snapdate <<END
 $snap
 END
 
+sleep 2
+n=0
 while [ -e "$lock" ]; do
     error "$lock exists. You can't run this script while pacman is running.\n"
-    sleep 10
+    sleep 5
+    n=$((n+1))
+    if [ $n -gt 12 ]; then
+        error "Timeout waiting for $lock. Exiting..."
+        exit 2
+    fi
 done
 
 trap cleanup EXIT
