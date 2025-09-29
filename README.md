@@ -6,7 +6,7 @@ Auto create systemd-boot entries when snapshots are created
 - `snapshot.bash`: create snapshot (meant to be run as cronjob)
 - `systemd-boot-btrfsd.bash`: wait for new snapshots and create boot entries
 - `systemd-boot-btrfsd.service`: service for the script above
-- `systemctl-pacman.hook`: hook to enable service above
+- `systemd-boot-btrfsd.hook`: hook to enable service above
 
 ## How it works
 The `snapshot.bash` script will create snapshots separated as m̀anual, boot,

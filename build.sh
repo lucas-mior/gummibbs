@@ -12,7 +12,7 @@ DESTDIR="${DESTDIR:-/}"
 program="snapshot.bash"
 program2="systemd-boot-btrfsd.bash"
 service="systemd-boot-btrfsd.service"
-hook="systemctl-pacman.hook"
+hook="systemd-boot-btrfsd.hook"
 
 echo "0$0"
 
