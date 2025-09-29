@@ -164,7 +164,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         set +x
         error "Error generating initramfs using snapshotted mkinitcpio.\n"
     fi
-    if ! "$snapshot/usr/bin/booster" \
+    if ! "$snapshot/usr/bin/booster" build \
         --config "$snapshot/etc/booster.yaml" \
         --kernel-version "$snapshot/usr/lib/modules/$kernel" \
         "/tmp/$script/initramfs-$kernel_type.img"; then
