@@ -7,35 +7,50 @@ script=$(basename "$0")
 subvol=$(btrfs subvol show / | awk '/Name:/{print $NF}')
 
 error () {
-    >&2 echo "$1"
+    >&2 printf "$@"
 }
 
 export LC_ALL=C
 snapshots="/.snapshots/"
 
 if btrfs subvol show / | head -n 1 | grep -q -- "$snapshots"; then
-    error "Snapshot mounted. Exiting..."
+    error "Snapshot mounted. Exiting...\n"
     exit 1
 fi
 
 if echo "$subvol" | grep -q "^[0-9]\{8\}_[0-9]\{6\}"; then
-    error "Subvolume name matches date format. Exiting..."
+    error "Subvolume name matches date format. Exiting...\n"
     exit 1
 fi
 
 template=$(bootctl | awk '/Current Entry:/ {print $NF}')
 if [ ! -e "/boot/loader/entries/$template" ]; then
-    error "template boot entry '$template' does not exist"
+    error "Template boot entry '$template' does not exist.\n"
     exit 1
 fi
 
 template2=$(awk '/default/ {print $NF}' "/boot/loader/loader.conf")
 if [ "$template2" != "$template" ]; then
-    error "Default boot option ($template2) is not the booted one ($template)"
+    error "Default boot option ($template2)"
+    error " is not the booted one ($template).\n"
     exit 1
 fi
 
-error "Deleting boot entries with inexistent snapshots or kernels or initrds"
+subvol2=$(awk \
+          '/rootflags.+subvol=/ {
+              subvol = gensub(".+subvol=(.+).*", "\\1", "g", $0);
+              print subvol;
+          }' "/boot/loader/entries/$template")
+
+if [ "$subvol" != "$subvol2" ]; then
+    error "Root subvolume ($subvol)"
+    error " is not the one specified in $template ($subvol2).\n"
+    exit 1
+fi
+
+
+
+error "Deleting boot entries with inexistent snapshots or kernels or initrds.\n"
 for entry in /boot/loader/entries/*.conf; do
     snap=$(echo "$entry" \
             | sed -E -e 's|/boot/loader/entries/||' \
@@ -53,7 +68,7 @@ for entry in /boot/loader/entries/*.conf; do
 
     linux=$(awk '/^linux/{printf("%s/%s\n", "/boot", $NF);}' "$entry")
     if [ ! -e "$linux" ]; then
-        error "Referenced kernel $linux no longer exists. Deleting entry..."
+        error "Referenced kernel $linux no longer exists. Deleting entry...\n"
         rm -v "$entry"
         continue
     fi
@@ -61,7 +76,8 @@ for entry in /boot/loader/entries/*.conf; do
     initrds=$(awk '/^initrd/{printf("%s/%s\n", "/boot", $NF);}' "$entry")
     for initrd in $initrds; do
         if [ ! -e "$initrd" ]; then
-            error "Referenced initrd $initrd does not exist. Deleting entry..."
+            error "Referenced initrd $initrd does not exist."
+            error " Deleting entry...\n"
             rm -v "$entry"
             continue
         fi
@@ -81,7 +97,7 @@ savefrom() {
     ext=$(echo "$current" | sed -E 's/[^.]+(\..+)?/\1/')
 
     if [ -z "$snapdate" ]; then
-        error "\$snapdate must be set"
+        error "\$snapdate must be set.\n"
         exit 1
     fi
 
@@ -100,7 +116,7 @@ savefrom() {
         && printf "/boot/$conf\n"
 }
 
-error "Generating boot entries for existing snapshots..."
+error "Generating boot entries for existing snapshots...\n"
 find /.snapshots/ -mindepth 2 -maxdepth 2 \
 | while read -r snapshot; do
     snap=$(echo "$snapshot" | awk -F'/' '{print $NF}')
@@ -108,7 +124,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     entry="/boot/loader/entries/$snap.conf"
 
     if [ -e "$entry" ]; then
-        error "$entry already exists."
+        error "$entry already exists.\n"
         continue
     fi
 
@@ -121,14 +137,12 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         kernel_type="linux-lts"
     elif echo "$kernel" | grep -q -- "-hardened$"; then
         kernel_type="linux-hardened"
-        error "snapshot $snapshot used linux-hardened which is not supported."
-        exit 1
     elif echo "$kernel" | grep -q -- "-zen$"; then
         kernel_type="linux-zen"
     elif echo "$kernel" | grep -q -- "-arch"; then
         kernel_type="linux"
     else
-        error "Unknown kernel type $kernel"
+        error "Unknown kernel type $kernel.\n"
         exit 1
     fi
 
@@ -142,13 +156,13 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         -r "$snapshot" \
         --kernel "$kernel" \
         --generate "/tmp/$script/initramfs-$kernel_type.img"; then
-        error "Error generating initramfs using snapshotted mkinitcpio"
+        error "Error generating initramfs using snapshotted mkinitcpio.\n"
     fi
     if ! "$snapshot/usr/bin/booster" \
         -c "$snapshot/etc/booster.yaml" \
         -p "$snapshot/usr/lib/modules/$kernel" \
         -o "/tmp/$script/initramfs-$kernel_type.img"; then
-        error "Error generating initramfs using snapshotted booster"
+        error "Error generating initramfs using snapshotted booster.\n"
     fi
     set +x
 
@@ -157,7 +171,8 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     initrd_booster=$(savefrom    "/tmp/$script" "booster-$kernel_type.img")
 
     if [ -z "$initrd_mkinitcpio" ] && [ -z "$initrd_booster" ]; then
-        error "Error generating initramfs: both mkinitcpio and booster failed."
+        error "Error generating initramfs:"
+        error " both mkinitcpio and booster failed.\n"
         exit 1
     fi
 
@@ -168,7 +183,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     initrd_booster=$(echo "$initrd_booster"       | sed 's|/boot/||')
 
     if [ -z "$linux" ]; then
-        error "Error creating configuration for snapshotted kernel."
+        error "Error creating configuration for snapshotted kernel.\n"
         exit 1
     fi
 
@@ -188,7 +203,7 @@ unset kind snap snapshot linux initrd_mkinitcpio initrd_booster
 while true; do
 snap=$(inotifywait -e create "/$snapshots/"{manual,boot,hour,day,week,month})
 if [ $? != 0 ] || [ -z "$snap" ]; then
-    error "Error in inotifywait."
+    error "Error in inotifywait.\n"
     exit 1
 fi
 snap=$(echo "$snap" \
@@ -200,7 +215,7 @@ $snap
 END
 
 while [ -e "$lock" ]; do
-    error "$lock exists. You can't run this script while pacman is running."
+    error "$lock exists. You can't run this script while pacman is running.\n"
     sleep 10
 done
 
@@ -212,8 +227,6 @@ if echo "$kernel" | grep -q -- "-lts$"; then
     kernel_type="linux-lts"
 elif echo "$kernel" | grep -q -- "-hardened$"; then
     kernel_type="linux-hardened"
-    error "linux-hardened not supported"
-    exit 1
 elif echo "$kernel" | grep -q -- "-zen$"; then
     kernel_type="linux-zen"
 else
@@ -226,12 +239,12 @@ initrd_mkinitcpio=$(savefrom /boot "initramfs-$kernel_type.img" | sed 's|/boot/|
 initrd_booster=$(savefrom    /boot "booster-$kernel_type.img" | sed 's|/boot/||')
 
 if [ -z "$initrd_mkinitcpio" ] && [ -z "$initrd_booster" ]; then
-    error "Error generating initramfs: both mkinitcpio and booster failed."
+    error "Error generating initramfs: both mkinitcpio and booster failed.\n"
     exit 1
 fi
 
 if [ -z "$linux" ]; then
-    error "Error creating configuration for kernel."
+    error "Error creating configuration for kernel.\n"
     continue
 fi
 
