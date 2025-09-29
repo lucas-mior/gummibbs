@@ -50,11 +50,8 @@ if [ "$template2" != "$template" ]; then
     exit 1
 fi
 
-subvol2=$(awk '
-          /rootflags.+subvol=/ {
-              subvol = gensub(".+subvol=(.+).*", "\\1", "g", $0);
-              print subvol;
-          }' "/boot/loader/entries/$template")
+subvol2=$(sed -n '/rootflags/{s/.*subvol=\([^ ,;]*\).*/\1/p}' \
+                 "/boot/loader/entries/$template")
 
 if [ "$subvol" != "$subvol2" ]; then
     error "Root subvolume ($subvol)"
