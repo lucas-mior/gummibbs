@@ -48,8 +48,6 @@ if [ "$subvol" != "$subvol2" ]; then
     exit 1
 fi
 
-
-
 error "Deleting boot entries with inexistent snapshots or kernels or initrds.\n"
 for entry in /boot/loader/entries/*.conf; do
     snap=$(echo "$entry" \
