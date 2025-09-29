@@ -238,10 +238,13 @@ else
     kernel_type="linux"
 fi
 
-linux="$(savefrom /boot "vmlinuz-$kernel_type" | sed 's|/boot/||')"
+linux=$(savefrom             /boot "vmlinuz-$kernel_type")
+initrd_mkinitcpio=$(savefrom /boot "initramfs-$kernel_type.img")
+initrd_booster=$(savefrom    /boot "booster-$kernel_type.img")
 
-initrd_mkinitcpio=$(savefrom /boot "initramfs-$kernel_type.img" | sed 's|/boot/||')
-initrd_booster=$(savefrom    /boot "booster-$kernel_type.img" | sed 's|/boot/||')
+linux=$(echo "$linux"                         | sed 's|/boot/||')
+initrd_mkinitcpio=$(echo "$initrd_mkinitcpio" | sed 's|/boot/||')
+initrd_booster=$(echo "$initrd_booster"       | sed 's|/boot/||')
 
 if [ -z "$initrd_mkinitcpio" ] && [ -z "$initrd_booster" ]; then
     error "Error generating initramfs: both mkinitcpio and booster failed.\n"
