@@ -2,7 +2,7 @@
 
 # shellcheck disable=SC2317,SC2001,SC2181
 printf "\n$0\n\n"
-script="$(basename "$0")"
+script=$(basename "$0")
 
 error () {
     >&2 echo "$1"
@@ -16,13 +16,13 @@ if btrfs subvol show / | head -n 1 | grep -q -- "$snapshots"; then
     exit 1
 fi
 
-template="$(bootctl | awk '/Current Entry:/ {print $NF}')"
+template=$(bootctl | awk '/Current Entry:/ {print $NF}')
 if [ ! -e "/boot/loader/entries/$template" ]; then
     error "template boot entry '$template' does not exist"
     exit 1
 fi
 
-template2="$(awk '/default/ {print $NF}' "/boot/loader/loader.conf")"
+template2=$(awk '/default/ {print $NF}' "/boot/loader/loader.conf")
 if [ "$template2" != "$template" ]; then
     error "Default boot option ($template2) is not the booted one ($template)"
     exit 1
@@ -30,28 +30,28 @@ fi
 
 error "Deleting boot entries with inexistent snapshots or kernels or initrds"
 for entry in /boot/loader/entries/*.conf; do
-    snap="$(echo "$entry" \
+    snap=$(echo "$entry" \
             | sed -E -e 's|/boot/loader/entries/||' \
-                     -e 's|.conf||')"
+                     -e 's|.conf||')
     if echo "$snap" | grep -qv "^[0-9]\{8\}_[0-9]\{6\}"; then
         continue
     fi
 
-    match="$(find "/$snapshots/" -maxdepth 2 -name "$snap" | wc -l)"
+    match=$(find "/$snapshots/" -maxdepth 2 -name "$snap" | wc -l)
     if [ "$match" = "0" ]; then
         error "$snap not found\n"
         rm -v "$entry"
         continue
     fi
 
-    linux="$(awk '/^linux/{printf("%s/%s\n", "/boot", $NF);}' "$entry")"
+    linux=$(awk '/^linux/{printf("%s/%s\n", "/boot", $NF);}' "$entry")
     if [ ! -e "$linux" ]; then
         error "Referenced kernel $linux no longer exists. Deleting entry..."
         rm -v "$entry"
         continue
     fi
 
-    initrds="$(awk '/^initrd/{printf("%s/%s\n", "/boot", $NF);}' "$entry")"
+    initrds=$(awk '/^initrd/{printf("%s/%s\n", "/boot", $NF);}' "$entry")
     for initrd in $initrds; do
         if [ ! -e "$initrd" ]; then
             error "Referenced initrd $initrd no longer exists. Deleting entry..."
@@ -68,10 +68,10 @@ cleanup() {
 }
 
 savefrom() {
-    dir="$1"
-    current="$2"
-    base="$(echo "$current" | sed -E 's/\..+//')"
-    ext="$(echo "$current" | sed -E 's/[^.]+(\..+)?/\1/')"
+    dir=$1
+    current=$2
+    base=$(echo "$current" | sed -E 's/\..+//')
+    ext=$(echo "$current" | sed -E 's/[^.]+(\..+)?/\1/')
 
     if [ -z "$snapdate" ]; then
         error "\$snapdate must be set"
@@ -107,7 +107,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     fi
 
     # shellcheck disable=SC2012
-    kernel="$(ls -1t "$snapshot/usr/lib/modules" | head -n 1)"
+    kernel=$(ls -1t "$snapshot/usr/lib/modules" | head -n 1)
     if echo "$kernel" | grep -q -- "-lts$"; then
         kernel_type="linux-lts"
     elif echo "$kernel" | grep -q -- "-hardened$"; then
@@ -143,20 +143,20 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     fi
     set +x
 
-    linux="$(savefrom "/tmp/$script" "vmlinuz-$kernel_type")"
-    initrd_mkinitcpio_mkinitcpio="$(savefrom "/tmp/$script" "initramfs-$kernel_type.img")"
-    initrd_mkinitcpio_booster="$(savefrom    "/tmp/$script" "booster-$kernel_type.img")"
+    linux=$(savefrom "/tmp/$script" "vmlinuz-$kernel_type")
+    initrd_mkinitcpio=$(savefrom "/tmp/$script" "initramfs-$kernel_type.img")
+    initrd_booster=$(savefrom    "/tmp/$script" "booster-$kernel_type.img")
 
-    if [ -z "$initrd_mkinitcpio_mkinitcpio" ] && [ -z "$initrd_mkinitcpio_booster" ]; then
+    if [ -z "$initrd_mkinitcpio" ] && [ -z "$initrd_booster" ]; then
         error "Error generating initramfs: both mkinitcpio and booster failed."
         exit 1
     fi
 
     rm -v "$lock"
 
-    linux="$(echo "$linux" | sed 's|/boot/||')"
-    initrd_mkinitcpio_mkinitcpio="$(echo "$initrd_mkinitcpio_mkinitcpio" | sed 's|/boot/||')"
-    initrd_mkinitcpio_booster="$(echo "$initrd_mkinitcpio_booster" | sed 's|/boot/||')"
+    linux=$(echo "$linux" | sed 's|/boot/||')
+    initrd_mkinitcpio=$(echo "$initrd_mkinitcpio" | sed 's|/boot/||')
+    initrd_booster=$(echo "$initrd_booster" | sed 's|/boot/||')
 
     if [ -z "$linux" ]; then
         error "Error creating configuration for snapshotted kernel."
@@ -166,8 +166,8 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     sed -E -e "s|^title .+|title $kind/$snap|" \
            -e "s|subvol=@|subvol=@/.snapshots/$kind/$snap|" \
            -e "s|^linux .+/vmlinuz-linux.*|linux /$linux|" \
-           -e "s|^initrd .+/initramfs-linux.*\.img$|initrd /$initrd_mkinitcpio_mkinitcpio|" \
-           -e "s|^initrd .+/booster-linux.*\.img$|initrd /$initrd_mkinitcpio_booster|" \
+           -e "s|^initrd .+/initramfs-linux.*\.img$|initrd /$initrd_mkinitcpio|" \
+           -e "s|^initrd .+/booster-linux.*\.img$|initrd /$initrd_booster|" \
            -e "s|//+|/|g" \
         "/boot/loader/entries/$template" \
         | tee "$entry"
