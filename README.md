@@ -24,6 +24,13 @@ except for other partitions/subvolumes you have used along the way.
 Consider adding `nofail` option to non critical partitions/subvolumes in
 `/etc/fstab` to avoid surprises.
 
+When run, this script first does some housekeeping: It deletes boot entries
+pointing to inexistent snapshots/kernels, and tries to create missing boot
+entries for snapshots. It uses the root filesystem to get the kernel and
+regenerate the iniramfs. It is possible to get a wrong boot entry if the
+snapshot is messed up, or if you have more than one kernel saved in
+`/lib/modules` (the most recent will be selected).
+
 ## Installation
 ```sh
 # clone repository
