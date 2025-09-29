@@ -12,7 +12,7 @@ error () {
 export LC_ALL=C
 snapshots="/.snapshots/"
 
-if btrfs subvol show / | head -n 1 | grep -q -- "$snapshots"; then
+if btrfs subvol show / | head -n 1 | grep -Eq -- "$snapshots"; then
     error "Snapshot mounted. Exiting...\n"
     exit 1
 fi
@@ -20,6 +20,11 @@ fi
 subvol=$(btrfs subvol show / | awk '/Name:/{print $NF}')
 if echo "$subvol" | grep -q "^[0-9]\{8\}_[0-9]\{6\}"; then
     error "Subvolume name matches date format. Exiting...\n"
+    exit 1
+fi
+
+if echo "$subvol" | grep -E --color=auto '([|/&\\$\(\)[]|])'; then
+    error "Subvolume name contains invalid chars: $subvol \n"
     exit 1
 fi
 
