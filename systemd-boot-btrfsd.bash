@@ -148,7 +148,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         kernel_type="linux"
     else
         error "Unknown kernel type $kernel.\n"
-        exit 2
+        exit $fatal_error
     fi
 
     mkdir -p "/tmp/$script"
@@ -228,7 +228,7 @@ while [ -e "$lock" ]; do
     n=$((n+1))
     if [ $n -gt 12 ]; then
         error "Timeout waiting for $lock. Exiting..."
-        exit 2
+        exit $fatal_error
     fi
 done
 
@@ -246,7 +246,7 @@ elif echo "$kernel" | grep -Eq -- "-arch"; then
     kernel_type="linux"
 else
     error "Unknown kernel type $kernel.\n"
-    exit 2
+    exit $fatal_error
 fi
 
 linux=$(savefrom             /boot "vmlinuz-$kernel_type")
