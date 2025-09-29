@@ -132,16 +132,17 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     kind=$(echo "$snapshot" | awk -F'/' '{print $(NF-1)}')
     entry="/boot/loader/entries/$snap.conf"
 
-    if [ -e "$entry" ]; then
-        error "$entry already exists.\n"
-        continue
-    fi
+    # if [ -e "$entry" ]; then
+    #     error "$entry already exists.\n"
+    #     continue
+    # fi
 
     kernel=$(find "$snapshot/lib/modules" \
-             -mindepth 1 -maxdepth 1 \
-             -type d -printf '%T@ %P\n' \
+             -mindepth 2 -maxdepth 2 \
+             -iname "vmlinuz" \
+             -type f -printf '%T@ %p\n' \
              | sort -nr | head -n1 \
-             | cut -d' ' -f2)
+             | awk -F/ '{print $(NF-1)}')
     if echo "$kernel" | grep -Eq -- "-lts"; then
         kernel_type="linux-lts"
     elif echo "$kernel" | grep -Eq -- "-hardened"; then
