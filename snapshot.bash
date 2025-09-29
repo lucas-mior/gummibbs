@@ -88,3 +88,5 @@ btrfs subvolume snapshot / "$dir/$date"
 if [ "$take_home_snapshot" = true ]; then
     btrfs subvolume snapshot /home "/home/$snapshots/$kind/$date"
 fi
+
+rm -v "$lock"

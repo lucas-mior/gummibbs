@@ -10,11 +10,12 @@ error () {
 }
 
 exit_on_error2 () {
-    if [ "$?" = "2" ]; then
-        exit 2
+    if [ "$?" = "$fatal_error" ]; then
+        exit $fatal_error
     fi
 }
 set -E
+fatal_error=2
 trap exit_on_error2 ERR
 
 export LC_ALL=C
@@ -188,7 +189,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     if [ -z "$initrd_mkinitcpio" ] && [ -z "$initrd_booster" ]; then
         error "Error generating initramfs:"
         error " both mkinitcpio and booster failed.\n"
-        exit 2
+        exit $fatal_error
     fi
 
     linux=$(echo "$linux"                         | sed 's|/boot/||')
@@ -197,7 +198,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
 
     if [ -z "$linux" ]; then
         error "Error creating configuration for snapshotted kernel.\n"
-        exit 2
+        exit $fatal_error
     fi
 
     sed -E -e "s|^title .+|title $kind/$snap|" \
@@ -256,12 +257,12 @@ initrd_booster=$(echo "$initrd_booster"       | sed 's|/boot/||')
 
 if [ -z "$initrd_mkinitcpio" ] && [ -z "$initrd_booster" ]; then
     error "Error generating initramfs: both mkinitcpio and booster failed.\n"
-    exit 1
+    exit $fatal_error
 fi
 
 if [ -z "$linux" ]; then
     error "Error creating configuration for kernel.\n"
-    exit 1
+    exit $fatal_error
 fi
 
 kind="$(echo "$kind" | sed 's|/||g')"
