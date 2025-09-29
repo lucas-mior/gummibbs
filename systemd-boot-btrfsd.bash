@@ -5,7 +5,7 @@ printf "\n$0\n\n"
 script="$(basename "$0")"
 
 error () {
-    >&2 echo "$message"
+    >&2 echo "$1"
 }
 
 export LC_ALL=C
@@ -64,7 +64,7 @@ done
 lock="/var/lib/pacman/db.lck"
 cleanup() {
     rm -v "$lock"
-    rm -vrf /tmp/$script/
+    rm -vrf "/tmp/$script/"
 }
 
 savefrom() {
@@ -213,8 +213,8 @@ fi
 
 linux="$(savefrom /boot "vmlinuz-$kernel_type" | sed 's|/boot/||')"
 
-initrd_mkinitcpio="$(savefrom /boot "initramfs-$kernel_type.img" | sed 's|/boot/||')"
-initrd_booster="$(savefrom    /boot "booster-$kernel_type.img" | sed 's|/boot/||')"
+initrd_mkinitcpio=$(savefrom /boot "initramfs-$kernel_type.img" | sed 's|/boot/||')
+initrd_booster=$(savefrom    /boot "booster-$kernel_type.img" | sed 's|/boot/||')
 
 if [ -z "$initrd_mkinitcpio" ] && [ -z "$initrd_booster" ]; then
     error "Error generating initramfs: both mkinitcpio and booster failed."
