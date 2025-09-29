@@ -9,6 +9,14 @@ error () {
     >&2 printf "$@"
 }
 
+exit_on_error2 () {
+    if [ "$?" = "2" ]; then
+        exit 2
+    fi
+}
+set -E
+trap exit_on_error2 ERR
+
 export LC_ALL=C
 snapshots="/.snapshots/"
 
@@ -147,7 +155,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         kernel_type="linux"
     else
         error "Unknown kernel type $kernel.\n"
-        exit 1
+        exit 2
     fi
 
     mkdir -p "/tmp/$script"
@@ -180,7 +188,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     if [ -z "$initrd_mkinitcpio" ] && [ -z "$initrd_booster" ]; then
         error "Error generating initramfs:"
         error " both mkinitcpio and booster failed.\n"
-        exit 1
+        exit 2
     fi
 
     linux=$(echo "$linux"                         | sed 's|/boot/||')
@@ -189,7 +197,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
 
     if [ -z "$linux" ]; then
         error "Error creating configuration for snapshotted kernel.\n"
-        exit 1
+        exit 2
     fi
 
     sed -E -e "s|^title .+|title $kind/$snap|" \
