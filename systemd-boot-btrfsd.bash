@@ -9,14 +9,9 @@ error () {
     >&2 printf "$@"
 }
 
-exit_on_error2 () {
-    if [ "$?" = "$fatal_error" ]; then
-        exit $fatal_error
-    fi
-}
 set -E
 fatal_error=2
-trap exit_on_error2 ERR
+trap '[ "$?" = "$fatal_error" ] && exit $fatal_error' ERR
 
 export LC_ALL=C
 snapshots="/.snapshots/"
