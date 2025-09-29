@@ -256,7 +256,7 @@ initrd_mkinitcpio=$(savefrom /boot "initramfs-$kernel_type.img")
 initrd_booster=$(savefrom    /boot "booster-$kernel_type.img")
 
 if [ -z "$initrd_mkinitcpio" ] && [ -z "$initrd_booster" ]; then
-    error "Error generating initramfs: both mkinitcpio and booster failed.\n"
+    error "Error creating configuration for initramfs.\n"
     exit $fatal_error
 fi
 
