@@ -142,11 +142,11 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
              -type d -printf '%T@ %P\n' \
              | sort -nr | head -n1 \
              | cut -d' ' -f2)
-    if echo "$kernel" | grep -Eq -- "-lts$"; then
+    if echo "$kernel" | grep -Eq -- "-lts"; then
         kernel_type="linux-lts"
-    elif echo "$kernel" | grep -Eq -- "-hardened$"; then
+    elif echo "$kernel" | grep -Eq -- "-hardened"; then
         kernel_type="linux-hardened"
-    elif echo "$kernel" | grep -Eq -- "-zen$"; then
+    elif echo "$kernel" | grep -Eq -- "-zen"; then
         kernel_type="linux-zen"
     elif echo "$kernel" | grep -Eq -- "-arch"; then
         kernel_type="linux"
@@ -164,13 +164,10 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         --config      "$snapshot/etc/mkinitcpio.conf" \
         --moduleroot  "$snapshot" \
         --kernel      "$kernel" \
-        --generatedir "/tmp/$script/" \
         --generate    "/tmp/$script/initramfs-$kernel_type.img"; then
         set +x
         error "Error generating initramfs using snapshotted mkinitcpio.\n"
     fi
-    ls /tmp/$script/initramfs*
-    exit 2
     if ! "$snapshot/bin/booster" build \
         --config "$snapshot/etc/booster.yaml" \
         --kernel-version "$snapshot/lib/modules/$kernel" \
