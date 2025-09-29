@@ -156,13 +156,14 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     fi
 
     mkdir -p "/tmp/$script"
-    cp -v "$snapshot/lib/modules/$kernel/vmlinuz" \
-          "/tmp/$script/vmlinuz-$kernel_type"
+    if ! cp -v "$snapshot/lib/modules/$kernel/vmlinuz" \
+               "/tmp/$script/vmlinuz-$kernel_type"; then
+        error "Error getting kernel from snapshot.\n"
+        continue
+    fi
 
     snapdate=$snap
-    linux=$(savefrom "/tmp/$script/vmlinuz-$kernel_type")
-
-    linux=$(echo "$linux" | sed 's|/boot/||')
+    linux=$(savefrom "/tmp/$script/vmlinuz-$kernel_type" | sed 's|/boot/||')
 
     if [ -z "$linux" ]; then
         error "Error creating configuration for snapshotted kernel.\n"
