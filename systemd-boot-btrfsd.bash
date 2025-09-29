@@ -106,7 +106,7 @@ savefrom() {
     fi
 
     if [ ! -s "$current" ]; then
-        error "$current is empty."
+        error "$current is empty.\n"
         return 0
     fi
 
@@ -185,7 +185,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     if [ -z "$initrd_mkinitcpio" ] && [ -z "$initrd_booster" ]; then
         error "Error generating initramfs:"
         error " both mkinitcpio and booster failed.\n"
-        exit $fatal_error
+        continue
     fi
 
     linux=$(echo "$linux"                         | sed 's|/boot/||')
@@ -194,7 +194,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
 
     if [ -z "$linux" ]; then
         error "Error creating configuration for snapshotted kernel.\n"
-        exit $fatal_error
+        continue
     fi
 
     sed -E -e "s|^title .+|title $kind/$snap|" \
