@@ -164,11 +164,11 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
 
     set -x
     if ! "$snapshot/bin/mkinitcpio" \
-        --config "$snapshot/etc/mkinitcpio.conf" \
-        -r "$snapshot" \
-        -k "$kernel" \
-        -d "/tmp/$script/" \
-        -g "/tmp/$script/initramfs-$kernel_type.img"; then
+        --config      "$snapshot/etc/mkinitcpio.conf" \
+        --moduleroot  "$snapshot" \
+        --kernel      "$kernel" \
+        --generatedir "/tmp/$script/" \
+        --generate    "/tmp/$script/initramfs-$kernel_type.img"; then
         set +x
         error "Error generating initramfs using snapshotted mkinitcpio.\n"
     fi
