@@ -13,7 +13,7 @@ lock="/var/lib/pacman/db.lck"
 
 dir="/$snapshots/$kind"
 
-if btrfs subvol show / | head -n 1 | grep -q -- "$snapshots"; then
+if btrfs subvol show / | head -n 1 | grep -Eq -- "$snapshots"; then
     echo "$(basename "$0"):" "Snapshot mounted. Exiting..."
     exit 1
 fi

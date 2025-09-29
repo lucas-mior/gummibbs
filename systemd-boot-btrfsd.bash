@@ -18,7 +18,7 @@ if btrfs subvol show / | head -n 1 | grep -Eq -- "$snapshots"; then
 fi
 
 subvol=$(btrfs subvol show / | awk '/Name:/{print $NF}')
-if echo "$subvol" | grep -q "^[0-9]\{8\}_[0-9]\{6\}"; then
+if echo "$subvol" | grep -Eq "^[0-9]{8}_[0-9]{6}"; then
     error "Subvolume name matches date format. Exiting...\n"
     exit 1
 fi
@@ -58,7 +58,7 @@ for entry in /boot/loader/entries/*.conf; do
     snap=$(echo "$entry" \
             | sed -E -e 's|/boot/loader/entries/||' \
                      -e 's|.conf||')
-    if echo "$snap" | grep -qv "^[0-9]\{8\}_[0-9]\{6\}"; then
+    if echo "$snap" | grep -Eqv "^[0-9]{8}_[0-9]{6}"; then
         error "Ignoring entry $snap...\n"
         continue
     fi
@@ -137,13 +137,13 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
              -type d -printf '%T@ %P\n' \
              | sort -nr | head -n1 \
              | cut -d' ' -f2)
-    if echo "$kernel" | grep -q -- "-lts$"; then
+    if echo "$kernel" | grep -Eq -- "-lts$"; then
         kernel_type="linux-lts"
-    elif echo "$kernel" | grep -q -- "-hardened$"; then
+    elif echo "$kernel" | grep -Eq -- "-hardened$"; then
         kernel_type="linux-hardened"
-    elif echo "$kernel" | grep -q -- "-zen$"; then
+    elif echo "$kernel" | grep -Eq -- "-zen$"; then
         kernel_type="linux-zen"
-    elif echo "$kernel" | grep -q -- "-arch"; then
+    elif echo "$kernel" | grep -Eq -- "-arch"; then
         kernel_type="linux"
     else
         error "Unknown kernel type $kernel.\n"
@@ -228,11 +228,11 @@ trap cleanup EXIT
 touch "$lock"
 
 kernel=$(uname -r)
-if echo "$kernel" | grep -q -- "-lts$"; then
+if echo "$kernel" | grep -Eq -- "-lts$"; then
     kernel_type="linux-lts"
-elif echo "$kernel" | grep -q -- "-hardened$"; then
+elif echo "$kernel" | grep -Eq -- "-hardened$"; then
     kernel_type="linux-hardened"
-elif echo "$kernel" | grep -q -- "-zen$"; then
+elif echo "$kernel" | grep -Eq -- "-zen$"; then
     kernel_type="linux-zen"
 else
     kernel_type="linux"
