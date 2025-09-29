@@ -253,7 +253,7 @@ fi
 
 if [ -z "$linux" ]; then
     error "Error creating configuration for kernel.\n"
-    continue
+    exit 1
 fi
 
 kind="$(echo "$kind" | sed 's|/||g')"
