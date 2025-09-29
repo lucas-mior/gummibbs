@@ -23,7 +23,7 @@ if echo "$subvol" | grep -q "^[0-9]\{8\}_[0-9]\{6\}"; then
     exit 1
 fi
 
-if echo "$subvol" | grep -E --color=auto '([|/&\\$\(\)*[]|])'; then
+if echo "$subvol" | grep -E --color=auto '([|/&\\$\(\)*+[]|])'; then
     error "Subvolume name contains invalid chars: $subvol \n"
     exit 1
 fi
@@ -160,12 +160,14 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         -r "$snapshot" \
         --kernel "$kernel" \
         --generate "/tmp/$script/initramfs-$kernel_type.img"; then
+        set +x
         error "Error generating initramfs using snapshotted mkinitcpio.\n"
     fi
     if ! "$snapshot/usr/bin/booster" \
         -c "$snapshot/etc/booster.yaml" \
         -p "$snapshot/usr/lib/modules/$kernel" \
         -o "/tmp/$script/initramfs-$kernel_type.img"; then
+        set +x
         error "Error generating initramfs using snapshotted booster.\n"
     fi
     set +x
@@ -180,8 +182,6 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         error " both mkinitcpio and booster failed.\n"
         exit 1
     fi
-
-    rm -v "$lock"
 
     linux=$(echo "$linux"                         | sed 's|/boot/||')
     initrd_mkinitcpio=$(echo "$initrd_mkinitcpio" | sed 's|/boot/||')
