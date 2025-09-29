@@ -155,9 +155,6 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         exit $fatal_error
     fi
 
-    echo "kernel=$kernel==="
-    echo "kernel_type=$kernel_type==="
-
     mkdir -p "/tmp/$script"
     cp -v "$snapshot/lib/modules/$kernel/vmlinuz" \
           "/tmp/$script/vmlinuz-$kernel_type"
