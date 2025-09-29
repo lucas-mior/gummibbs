@@ -65,7 +65,7 @@ for entry in /boot/loader/entries/*.conf; do
             | sed -E -e 's|/boot/loader/entries/||' \
                      -e 's|.conf||')
     if echo "$snap" | grep -Eqv "^[0-9]{8}_[0-9]{6}"; then
-        error "Ignoring entry $snap...\n"
+        error "Ignoring entry $entry...\n"
         continue
     fi
 
