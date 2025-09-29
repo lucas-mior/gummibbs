@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# shellcheck disable=SC2317,SC2001,SC2181
 printf "\n$0\n\n"
 script=$(basename "$0")
 
@@ -78,7 +77,6 @@ savefrom() {
         exit 1
     fi
 
-    # shellcheck disable=SC2231
     for file in "$dir"/"$base"-*; do
         if [ ! -e "$file" ]; then
             continue
@@ -106,8 +104,11 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         continue
     fi
 
-    # shellcheck disable=SC2012
-    kernel=$(ls -1t "$snapshot/usr/lib/modules" | head -n 1)
+    kernel=$(find "$snapshot/usr/lib/modules" \
+             -mindepth 1 -maxdepth 1 \
+             -type d -printf '%T@ %P\n' \
+             | sort -nr | head -n1 \
+             | cut -d' ' -f2)
     if echo "$kernel" | grep -q -- "-lts$"; then
         kernel_type="linux-lts"
     elif echo "$kernel" | grep -q -- "-hardened$"; then
@@ -177,14 +178,14 @@ done
 unset kind snap snapshot linux initrd_mkinitcpio_mkinitcpio initrd_mkinitcpio_booster
 
 while true; do
-snap="$(inotifywait -e create "/$snapshots/"{manual,boot,hour,day,week,month})"
+snap=$(inotifywait -e create "/$snapshots/"{manual,boot,hour,day,week,month})
 if [ $? != 0 ] || [ -z "$snap" ]; then
     error "Error in inotifywait."
     exit 1
 fi
-snap="$(echo "$snap" \
+snap=$(echo "$snap" \
         | awk -v snapshots="$snapshots" \
-          '{printf("%s,%s\n", gensub(snapshots, "", "g", $1), $NF)}')"
+          '{printf("%s,%s\n", gensub(snapshots, "", "g", $1), $NF)}')
 
 IFS="," read -r kind snapdate <<END
 $snap
@@ -198,7 +199,7 @@ done
 trap cleanup EXIT
 touch "$lock"
 
-kernel="$(uname -r)"
+kernel=$(uname -r)
 if echo "$kernel" | grep -q -- "-lts$"; then
     kernel_type="linux-lts"
 elif echo "$kernel" | grep -q -- "-hardened$"; then
@@ -226,7 +227,6 @@ if [ -z "$linux" ]; then
     continue
 fi
 
-# shellcheck disable=SC2001
 kind="$(echo "$kind" | sed 's|/||g')"
 
 sed -E \
