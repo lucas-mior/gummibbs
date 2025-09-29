@@ -137,7 +137,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         continue
     fi
 
-    kernel=$(find "$snapshot/usr/lib/modules" \
+    kernel=$(find "$snapshot/lib/modules" \
              -mindepth 1 -maxdepth 1 \
              -type d -printf '%T@ %P\n' \
              | sort -nr | head -n1 \
@@ -155,22 +155,28 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         exit $fatal_error
     fi
 
+    echo "kernel=$kernel==="
+    echo "kernel_type=$kernel_type==="
+
     mkdir -p "/tmp/$script"
-    cp -v "$snapshot/usr/lib/modules/$kernel/vmlinuz" \
+    cp -v "$snapshot/lib/modules/$kernel/vmlinuz" \
           "/tmp/$script/vmlinuz-$kernel_type"
 
     set -x
-    if ! "$snapshot/usr/bin/mkinitcpio" \
+    if ! "$snapshot/bin/mkinitcpio" \
         --config "$snapshot/etc/mkinitcpio.conf" \
         -r "$snapshot" \
-        --kernel "$kernel" \
-        --generate "/tmp/$script/initramfs-$kernel_type.img"; then
+        -k "$kernel" \
+        -d "/tmp/$script/" \
+        -g "/tmp/$script/initramfs-$kernel_type.img"; then
         set +x
         error "Error generating initramfs using snapshotted mkinitcpio.\n"
     fi
-    if ! "$snapshot/usr/bin/booster" build \
+    ls /tmp/$script/initramfs*
+    exit 2
+    if ! "$snapshot/bin/booster" build \
         --config "$snapshot/etc/booster.yaml" \
-        --kernel-version "$snapshot/usr/lib/modules/$kernel" \
+        --kernel-version "$snapshot/lib/modules/$kernel" \
         "/tmp/$script/initramfs-$kernel_type.img"; then
         set +x
         error "Error generating initramfs using snapshotted booster.\n"
