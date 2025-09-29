@@ -36,8 +36,8 @@ if [ "$template2" != "$template" ]; then
     exit 1
 fi
 
-subvol2=$(awk \
-          '/rootflags.+subvol=/ {
+subvol2=$(awk '
+          /rootflags.+subvol=/ {
               subvol = gensub(".+subvol=(.+).*", "\\1", "g", $0);
               print subvol;
           }' "/boot/loader/entries/$template")
