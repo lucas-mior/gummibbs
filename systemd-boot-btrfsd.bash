@@ -55,7 +55,7 @@ for entry in /boot/loader/entries/*.conf; do
     initrds=$(awk '/^initrd/{printf("%s/%s\n", "/boot", $NF);}' "$entry")
     for initrd in $initrds; do
         if [ ! -e "$initrd" ]; then
-            error "Referenced initrd $initrd no longer exists. Deleting entry..."
+            error "Referenced initrd $initrd does not exist. Deleting entry..."
             rm -v "$entry"
             continue
         fi
