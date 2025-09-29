@@ -23,7 +23,7 @@ if echo "$subvol" | grep -q "^[0-9]\{8\}_[0-9]\{6\}"; then
     exit 1
 fi
 
-if echo "$subvol" | grep -E --color=auto '([|/&\\$\(\)[]|])'; then
+if echo "$subvol" | grep -E --color=auto '([|/&\\$\(\)*[]|])'; then
     error "Subvolume name contains invalid chars: $subvol \n"
     exit 1
 fi
@@ -170,6 +170,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     fi
     set +x
 
+    snapdate=$snap
     linux=$(savefrom "/tmp/$script" "vmlinuz-$kernel_type")
     initrd_mkinitcpio=$(savefrom "/tmp/$script" "initramfs-$kernel_type.img")
     initrd_booster=$(savefrom    "/tmp/$script" "booster-$kernel_type.img")
@@ -263,4 +264,6 @@ sed -E \
     -e "s|//+|/|g" \
     "/boot/loader/entries/$template" \
     | tee "/boot/loader/entries/$snapdate.conf"
+
+rm -v "$lock"
 done
