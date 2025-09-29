@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# shellcheck disable=SC2001,SC2181
+
 printf "\n$0\n\n"
 script=$(basename "$0")
 
@@ -155,9 +157,9 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
 
     rm -v "$lock"
 
-    linux=$(echo "$linux" | sed 's|/boot/||')
+    linux=$(echo "$linux"                         | sed 's|/boot/||')
     initrd_mkinitcpio=$(echo "$initrd_mkinitcpio" | sed 's|/boot/||')
-    initrd_booster=$(echo "$initrd_booster" | sed 's|/boot/||')
+    initrd_booster=$(echo "$initrd_booster"       | sed 's|/boot/||')
 
     if [ -z "$linux" ]; then
         error "Error creating configuration for snapshotted kernel."
