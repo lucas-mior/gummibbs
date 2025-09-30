@@ -1,5 +1,6 @@
 # systemd-boot-btrfs-snapshots
-Auto create systemd-boot entries when snapshots are created
+Auto create systemd-boot entries when snapshots are created.
+Only arch linux supported.
 
 ## Parts
 - `build.sh`: installation script
