@@ -7,6 +7,7 @@ script=$(basename "$0")
 
 error () {
     >&2 printf "$@"
+    return
 }
 
 set -E
@@ -91,7 +92,7 @@ done
 
 lock="/var/lib/pacman/db.lck"
 cleanup() {
-    grep "$snapshots" /proc/mounts \
+    grep -F "$snapshots" /proc/mounts \
         | while read -r fs; do
         fuser -vk "$fs"
         umount -v "$fs"
@@ -256,16 +257,16 @@ done
 unset kind snap snapshot linux initrd_mkinitcpio initrd_booster
 
 while true; do
-snap=$(inotifywait -e create "/$snapshots/"{manual,boot,hour,day,week,month})
+snap=$(inotifywait \
+       --format "%w %f%n" \
+       -e create "/$snapshots/"{manual,boot,hour,day,week,month})
 if [ $? != 0 ] || [ -z "$snap" ]; then
     error "Error in inotifywait.\n"
     exit 1
 fi
-snap=$(echo "$snap" \
-        | awk -v snapshots="$snapshots" \
-          '{printf("%s,%s\n", gensub(snapshots, "", "g", $1), $NF)}')
+snap=$(echo "$snap" | sed -E "s|$snapshots||; s|/||g")
 
-IFS="," read -r kind snapdate <<END
+IFS=" " read -r kind snapdate <<END
 $snap
 END
 
