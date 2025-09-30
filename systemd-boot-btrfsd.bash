@@ -15,6 +15,22 @@ fatal_error=2
 trap '[ "$?" = "$fatal_error" ] && exit $fatal_error' ERR
 
 export LC_ALL=C
+
+if ! bootctl status >/dev/null 2>&1; then
+    error "Not using systemd-boot. Exiting..."
+    exit 1
+fi
+
+if ls /boot/*.efi >/dev/null 2>&1; then
+    error "Unified kernel images detected in /boot. Exiting..."
+    exit 1
+fi
+
+if command -v dracut >/dev/null 2>&1; then
+    error "Dracut detected. Exiting..."
+    exit 1
+fi
+
 snapshots="/.snapshots/"
 
 if btrfs subvol show / | head -n 1 | grep -Eq -- "$snapshots"; then
