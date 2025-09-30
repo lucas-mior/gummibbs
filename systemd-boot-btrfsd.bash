@@ -183,10 +183,10 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     fi
 
     if ! grep -q "\b$snapshot\b" /proc/mounts; then
-        mount --bind "$snapshot" "$snapshot"
+        mount -v --bind "$snapshot" "$snapshot"
     fi
     if ! grep -q "\b$snapshot/mnt/\b" /proc/mounts; then
-        mount --bind "/tmp/" "$snapshot/mnt/" --mkdir
+        mount -v --bind "/tmp/" "$snapshot/mnt/" --mkdir
     fi
 
     arch-chroot "$snapshot" \
@@ -194,8 +194,8 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         -k "/mnt/$script/vmlinuz-$kernel_type" \
         -g "/mnt/$script/initramfs-$kernel_type.img"
 
-    umount "$snapshot/mnt"
-    umount "$snapshot"
+    umount -v "$snapshot/mnt"
+    umount -v "$snapshot"
 
     initramfs=$(savefrom "/tmp/$script/initramfs-$kernel_type.img")
     initramfs=$(echo "$initramfs" | sed 's|/boot/||')
