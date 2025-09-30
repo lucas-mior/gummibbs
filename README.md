@@ -24,12 +24,16 @@ except for other partitions/subvolumes you have used along the way.
 Consider adding `nofail` option to non critical partitions/subvolumes in
 `/etc/fstab` to avoid surprises.
 
-When run, this script first does some housekeeping: It deletes boot entries
-pointing to inexistent snapshots/kernels, and tries to create missing boot
-entries for snapshots. It uses the root filesystem to get the kernel.  However,
-the initramfs is not regenerated. It is possible to get a wrong boot entry if
-the snapshot is messed up, or if you have more than one kernel saved in
-`/lib/modules` (the most recent will be selected).
+When run, this script first does some housekeeping:
+- Boot entries that point to an inexistent snapshot, kernel or initrd are
+  deleted
+- Snapshots that have no corresponding boot entry get one. The kernel is
+  recovered from the snapshot root and the initramfs is generated
+  * Only mkinitcpio and booster supported. If both commands are found,
+    mkinitcpio is prefered.
+  * It is possible to get a wrong boot entry if the snapshot is messed up, or if
+    you have more than one kernel save in `/lib/modules` (the most recent will
+    be selected)
 
 ## Installation
 ```sh
