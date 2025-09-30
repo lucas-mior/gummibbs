@@ -132,7 +132,7 @@ savefrom() {
 }
 
 error "Generating boot entries for existing snapshots...\n"
-find /.snapshots/ -mindepth 2 -maxdepth 2 \
+find /$snapshots -mindepth 2 -maxdepth 2 \
 | while read -r snapshot; do
     snapshot=$(echo "$snapshot" | sed -E 's|//|/|; s|/$||;')
     snap=$(echo "$snapshot" | awk -F'/' '{print $NF}')
