@@ -189,30 +189,67 @@ find /$snapshots -mindepth 2 -maxdepth 2 \
         mount -v --bind "/tmp/" "$snapshot/mnt/" --mkdir
     fi
 
+    set -x
     if ! arch-chroot "$snapshot" \
         mkinitcpio000 \
         -k "/mnt/$script/vmlinuz-$kernel_type" \
         -g "/mnt/$script/initramfs-$kernel_type.img"; then
+        set +x
         error "Error generating initramfs using mkinitcpio.\n"
     fi
+    set -x
+    if ! arch-chroot "$snapshot" \
+        booster build \
+        --kernel-version "$kernel" \
+        "/mnt/$script/booster-$kernel_type.img"; then
+        set +x
+        error "Error generating initramfs using booster.\n"
+    fi
+    set +x
 
     umount -v "$snapshot/mnt"
     umount -v "$snapshot"
 
-    initramfs=$(savefrom "/tmp/$script/initramfs-$kernel_type.img")
-    initramfs=$(echo "$initramfs" | sed 's|/boot/||')
-    if [ -z "$initramfs" ]; then
+    initrd_mkinitcpio=$(savefrom "/tmp/$script/initramfs-$kernel_type.img")
+    initrd_booster=$(savefrom    "/tmp/$script/booster-$kernel_type.img")
+
+    initrd_mkinitcpio=$(echo "$initrd_mkinitcpio" | sed 's|/boot/||')
+    initrd_booster=$(echo "$initrd_booster" | sed 's|/boot/||')
+
+    if [ -z "$initrd_mkinitcpio" ] && [ -z "$initrd_booster" ]; then
         error "Error creating initramfs for $kernel_type.\n"
         continue
     fi
 
-    sed -E -e "s|^title .+|title $kind/$snap|" \
-           -e "s|subvol=$subvol|subvol=$subvol/.snapshots/$kind/$snap|" \
-           -e "s|^linux .+/vmlinuz-linux.*|linux /$linux|" \
-           -e "s|^initrd .+/initramfs.*|initrd /$initramfs|" \
-           -e "s|//+|/|g" \
+    sed -E \
+        -e "s|^title .+|title $kind/$snap|" \
+        -e "s|subvol=$subvol|subvol=$subvol/.snapshots/$kind/$snap|" \
+        -e "s|^linux .+/vmlinuz-linux.*|linux /$linux|" \
+        -e "s|//+|/|g" \
         "/boot/loader/entries/$template" \
         | tee "$entry"
+
+    if [ -n "$initrd_mkinitcpio" ] && [ -z "$initrd_booster" ]; then
+        sed -i -E \
+            -e "s|^initrd .+/initramfs.*|initrd /$initrd_mkinitcpio|" \
+            -e "s|^initrd .+/booster.*|initrd /$initrd_mkinitcpio|" \
+            -e "s|//+|/|g" "$entry"
+    elif [ -z "$initrd_mkinitcpio" ] && [ -n "$initrd_booster" ]; then
+        sed -i -E \
+            -e "s|^initrd .+/initramfs.*|initrd /$initrd_booster|" \
+            -e "s|^initrd .+/booster.*|initrd /$initrd_booster|" \
+            -e "s|//+|/|g" "$entry"
+    elif [ -n "$initrd_mkinitcpio" ] && [ -n "$initrd_booster" ]; then
+        error "Warning: Both mkinitcpio and booster detected on snapshot.\n"
+        error "defaulting to mkinitcpio...\n"
+        sed -i -E \
+            -e "s|^initrd .+/initramfs.*|initrd /$initrd_mkinitcpio|" \
+            -e "s|^initrd .+/booster.*|initrd /$initrd_mkinitcpio|" \
+            -e "s|//+|/|g" "$entry"
+    else
+        error "This condition should be discarted before.\n"
+        exit $fatal_error
+    fi
 
 done
 
