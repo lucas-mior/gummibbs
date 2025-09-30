@@ -134,6 +134,7 @@ savefrom() {
 error "Generating boot entries for existing snapshots...\n"
 find /.snapshots/ -mindepth 2 -maxdepth 2 \
 | while read -r snapshot; do
+    snapshot=$(echo "$snapshot" | sed -E 's|//|/|; s|/$||;')
     snap=$(echo "$snapshot" | awk -F'/' '{print $NF}')
     kind=$(echo "$snapshot" | awk -F'/' '{print $(NF-1)}')
     entry="/boot/loader/entries/$snap.conf"
@@ -184,7 +185,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     if ! grep -q "\b$snapshot\b" /proc/mounts; then
         mount --bind "$snapshot" "$snapshot"
     fi
-    if ! grep -q "$snapshot/mnt/" /proc/mounts; then
+    if ! grep -q "\b$snapshot/mnt/\b" /proc/mounts; then
         mount --bind "/tmp/" "$snapshot/mnt/" --mkdir
     fi
 
