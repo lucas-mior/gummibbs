@@ -92,7 +92,7 @@ done
 lock="/var/lib/pacman/db.lck"
 cleanup() {
     grep "$snapshots" /proc/mounts \
-        | while read fs; do
+        | while read -r fs; do
         fuser -vk "$fs"
         umount -v "$fs"
     done
