@@ -173,6 +173,10 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
 
     snapdate=$snap
     linux=$(savefrom "/tmp/$script/vmlinuz-$kernel_type" | sed 's|/boot/||')
+    if [ -z "$linux" ]; then
+        error "Error creating configuration for snapshotted kernel.\n"
+        continue
+    fi
 
     if ! grep -q "$snapshot" /proc/mounts; then
         mount --bind "$snapshot" "$snapshot"
@@ -187,11 +191,6 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     initramfs=$(savefrom "/tmp/$script/initramfs-$kernel_type.img" | sed 's|/boot/||')
     if [ -z "$initramfs" ]; then
         error "Error creating initramfs for $kernel_type.\n"
-        continue
-    fi
-
-    if [ -z "$linux" ]; then
-        error "Error creating configuration for snapshotted kernel.\n"
         continue
     fi
 
