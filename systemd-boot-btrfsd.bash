@@ -181,7 +181,7 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         continue
     fi
 
-    if ! grep -q "$snapshot" /proc/mounts; then
+    if ! grep -q "\b$snapshot\b" /proc/mounts; then
         mount --bind "$snapshot" "$snapshot"
     fi
     if ! grep -q "$snapshot/mnt/" /proc/mounts; then
