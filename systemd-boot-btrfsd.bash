@@ -91,8 +91,11 @@ done
 
 lock="/var/lib/pacman/db.lck"
 cleanup() {
-    umount "$snapshot/mnt"
-    umount "$snapshot"
+    grep "$snapshots" /proc/mounts \
+        | while read fs; do
+        fuser -vk "$fs"
+        umount -v "$fs"
+    done
 
     rm -v "$lock"
     rm -vrf "/tmp/$script/"
@@ -186,7 +189,9 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     fi
 
     arch-chroot "$snapshot" \
-        mkinitcpio -g "/mnt/$script/initramfs-$kernel_type.img"
+        mkinitcpio \
+        -k "/mnt/$script/vmlinuz-$kernel_type" \
+        -g "/mnt/$script/initramfs-$kernel_type.img"
 
     initramfs=$(savefrom "/tmp/$script/initramfs-$kernel_type.img" | sed 's|/boot/||')
     if [ -z "$initramfs" ]; then
@@ -201,7 +206,6 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
            -e "s|//+|/|g" \
         "/boot/loader/entries/$template" \
         | tee "$entry"
-    exit 2
 
 done
 
