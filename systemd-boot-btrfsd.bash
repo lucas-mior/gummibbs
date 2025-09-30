@@ -192,7 +192,7 @@ find /$snapshots -mindepth 2 -maxdepth 2 \
         -k "/mnt/$script/vmlinuz-$kernel_type" \
         -g "/mnt/$script/initramfs-$kernel_type.img"; then
         set +x
-        error "Error generating initramfs using mkinitcpio.\n"
+        error "\nError generating initramfs using mkinitcpio.\n\n"
     fi
     set -x
     if ! arch-chroot "$snapshot" \
@@ -200,7 +200,7 @@ find /$snapshots -mindepth 2 -maxdepth 2 \
         --kernel-version "$kernel" \
         "/mnt/$script/booster-$kernel_type.img"; then
         set +x
-        error "Error generating initramfs using booster.\n"
+        error "\nError generating initramfs using booster.\n\n"
     fi
     set +x
 
@@ -214,7 +214,7 @@ find /$snapshots -mindepth 2 -maxdepth 2 \
     initrd_booster=$(echo    "$initrd_booster"    | sed 's|/boot/||')
 
     if [ -z "$initrd_mkinitcpio" ] && [ -z "$initrd_booster" ]; then
-        error "Error creating initramfs for $kernel_type.\n"
+        error "\nError creating initramfs for $snapdate.\n\n"
         continue
     fi
 
