@@ -303,6 +303,12 @@ IFS=" " read -r kind snapdate <<END
 $snap
 END
 
+if ! is_valid "$kind"; then
+    error "Invalid kind: $kind\n"
+    error "Valid kinds are: {${valid_kinds[*]}}\n"
+    exit "$fatal_error"
+fi
+
 sleep 2
 n=0
 while [ -e "$lock" ]; do
