@@ -273,8 +273,8 @@ while [ -e "$lock" ]; do
     sleep 5
     n=$((n+1))
     if [ $n -gt 12 ]; then
-        error "Timeout waiting for $lock. Exiting..."
-        exit $fatal_error
+        error "Timeout waiting for $lock. Continuing..."
+        continue
     fi
 done
 
