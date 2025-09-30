@@ -16,6 +16,11 @@ trap '[ "$?" = "$fatal_error" ] && exit $fatal_error' ERR
 
 export LC_ALL=C
 
+if [ ! -f /etc/os-release ] || ! grep -q '^ID=arch' /etc/os-release; then
+    error "Not running Arch Linux. Exiting..."
+    exit 1
+fi
+
 if ! bootctl status >/dev/null 2>&1; then
     error "Not using systemd-boot. Exiting..."
     exit 1
