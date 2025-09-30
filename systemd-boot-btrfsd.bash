@@ -91,6 +91,9 @@ done
 
 lock="/var/lib/pacman/db.lck"
 cleanup() {
+    umount "$snapshot/mnt"
+    umount "$snapshot"
+
     rm -v "$lock"
     rm -vrf "/tmp/$script/"
 }
@@ -137,6 +140,11 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         continue
     fi
 
+    # if [ $kind != manual ]; then
+    #     error "skipping $entry\n"
+    #     continue
+    # fi
+
     kernel=$(find "$snapshot/lib/modules" \
              -mindepth 2 -maxdepth 2 \
              -iname "vmlinuz" \
@@ -166,6 +174,22 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     snapdate=$snap
     linux=$(savefrom "/tmp/$script/vmlinuz-$kernel_type" | sed 's|/boot/||')
 
+    if ! grep -q "$snapshot" /proc/mounts; then
+        mount --bind "$snapshot" "$snapshot"
+    fi
+    if ! grep -q "$snapshot/mnt/" /proc/mounts; then
+        mount --bind "/tmp/" "$snapshot/mnt/" --mkdir
+    fi
+
+    arch-chroot "$snapshot" \
+        mkinitcpio -g "/mnt/$script/initramfs-$kernel_type.img"
+
+    initramfs=$(savefrom "/tmp/$script/initramfs-$kernel_type.img" | sed 's|/boot/||')
+    if [ -z "$initramfs" ]; then
+        error "Error creating initramfs for $kernel_type.\n"
+        continue
+    fi
+
     if [ -z "$linux" ]; then
         error "Error creating configuration for snapshotted kernel.\n"
         continue
@@ -174,9 +198,11 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
     sed -E -e "s|^title .+|title $kind/$snap|" \
            -e "s|subvol=$subvol|subvol=$subvol/.snapshots/$kind/$snap|" \
            -e "s|^linux .+/vmlinuz-linux.*|linux /$linux|" \
+           -e "s|^initrd .+/initramfs.*|initrd /$initramfs|" \
            -e "s|//+|/|g" \
         "/boot/loader/entries/$template" \
         | tee "$entry"
+    exit 2
 
 done
 
