@@ -2,6 +2,8 @@
 
 # shellcheck disable=SC2012
 
+shopt -s nullglob
+
 if [ -z "$1" ]; then
     echo "usage: $(basename "$0") <kind of snapshot>"
     exit 1

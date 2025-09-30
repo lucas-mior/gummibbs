@@ -164,6 +164,7 @@ find /$snapshots -mindepth 2 -maxdepth 2 \
         exit $fatal_error
     fi
 
+    rm -rf "/tmp/$script"
     mkdir -p "/tmp/$script"
     if ! cp -v "$snapshot/lib/modules/$kernel/vmlinuz" \
                "/tmp/$script/vmlinuz-$kernel_type"; then
