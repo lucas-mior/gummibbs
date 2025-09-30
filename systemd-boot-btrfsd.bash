@@ -145,11 +145,6 @@ find /$snapshots -mindepth 2 -maxdepth 2 \
         continue
     fi
 
-    if [ $kind != manual ]; then
-        error "skipping $entry\n"
-        continue
-    fi
-
     kernel=$(find "$snapshot/lib/modules" \
              -mindepth 2 -maxdepth 2 \
              -iname "vmlinuz" \
@@ -192,7 +187,7 @@ find /$snapshots -mindepth 2 -maxdepth 2 \
 
     set -x
     if ! arch-chroot "$snapshot" \
-        mkinitcpio000 \
+        mkinitcpio \
         -k "/mnt/$script/vmlinuz-$kernel_type" \
         -g "/mnt/$script/initramfs-$kernel_type.img"; then
         set +x
