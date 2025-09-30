@@ -193,6 +193,9 @@ find /.snapshots/ -mindepth 2 -maxdepth 2 \
         -k "/mnt/$script/vmlinuz-$kernel_type" \
         -g "/mnt/$script/initramfs-$kernel_type.img"
 
+    umount "$snapshot"
+    umount "$snapshot/mnt"
+
     initramfs=$(savefrom "/tmp/$script/initramfs-$kernel_type.img")
     initramfs=$(echo "$initramfs" | sed 's|/boot/||')
     if [ -z "$initramfs" ]; then
