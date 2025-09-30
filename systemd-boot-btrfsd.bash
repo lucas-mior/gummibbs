@@ -244,7 +244,7 @@ find /$snapshots -mindepth 2 -maxdepth 2 \
             -e "s|^initrd .+/booster.*|initrd /$initrd_mkinitcpio|" \
             -e "s|//+|/|g" "$entry"
     else
-        error "This condition should be discarted before.\n"
+        error "This condition should have been discarded before.\n"
         exit $fatal_error
     fi
 
