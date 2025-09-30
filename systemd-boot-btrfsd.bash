@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck disable=SC2001,SC2181
+# shellcheck disable=SC2001,SC2181,SC2317
 
 printf "\n$0\n\n"
 script=$(basename "$0")
@@ -153,6 +153,16 @@ savefrom() {
         && printf "/boot/$conf\n"
 }
 
+valid_kinds=(manual boot hour day week month)
+is_valid () {
+    for valid_kind in "${valid_kinds[@]}"; do
+        if [ "$valid_kind" = "$1" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
 error "Generating boot entries for existing snapshots...\n"
 find /$snapshots -mindepth 2 -maxdepth 2 \
 | while read -r snapshot; do
@@ -160,6 +170,12 @@ find /$snapshots -mindepth 2 -maxdepth 2 \
     snap=$(echo "$snapshot" | awk -F'/' '{print $NF}')
     kind=$(echo "$snapshot" | awk -F'/' '{print $(NF-1)}')
     entry="/boot/loader/entries/$snap.conf"
+
+    if ! is_valid "$kind"; then
+        error "Invalid kind: $kind\n"
+        error "Valid kinds are: {${valid_kinds[*]}}\n"
+        exit "$fatal_error"
+    fi
 
     if [ -e "$entry" ]; then
         error "$entry already exists.\n"
