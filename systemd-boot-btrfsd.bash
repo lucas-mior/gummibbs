@@ -211,7 +211,7 @@ find /$snapshots -mindepth 2 -maxdepth 2 \
     initrd_booster=$(savefrom    "/tmp/$script/booster-$kernel_type.img")
 
     initrd_mkinitcpio=$(echo "$initrd_mkinitcpio" | sed 's|/boot/||')
-    initrd_booster=$(echo "$initrd_booster" | sed 's|/boot/||')
+    initrd_booster=$(echo    "$initrd_booster"    | sed 's|/boot/||')
 
     if [ -z "$initrd_mkinitcpio" ] && [ -z "$initrd_booster" ]; then
         error "Error creating initramfs for $kernel_type.\n"
