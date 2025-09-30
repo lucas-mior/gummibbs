@@ -144,10 +144,10 @@ find /$snapshots -mindepth 2 -maxdepth 2 \
         continue
     fi
 
-    # if [ $kind != manual ]; then
-    #     error "skipping $entry\n"
-    #     continue
-    # fi
+    if [ $kind != manual ]; then
+        error "skipping $entry\n"
+        continue
+    fi
 
     kernel=$(find "$snapshot/lib/modules" \
              -mindepth 2 -maxdepth 2 \
@@ -189,10 +189,12 @@ find /$snapshots -mindepth 2 -maxdepth 2 \
         mount -v --bind "/tmp/" "$snapshot/mnt/" --mkdir
     fi
 
-    arch-chroot "$snapshot" \
-        mkinitcpio \
+    if ! arch-chroot "$snapshot" \
+        mkinitcpio000 \
         -k "/mnt/$script/vmlinuz-$kernel_type" \
-        -g "/mnt/$script/initramfs-$kernel_type.img"
+        -g "/mnt/$script/initramfs-$kernel_type.img"; then
+        error "Error generating initramfs using mkinitcpio.\n"
+    fi
 
     umount -v "$snapshot/mnt"
     umount -v "$snapshot"
