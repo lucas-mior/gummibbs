@@ -57,8 +57,8 @@ fi
 error "Deleting boot entries with inexistent snapshots or kernels or initrds.\n"
 for entry in /boot/loader/entries/*.conf; do
     snap=$(echo "$entry" \
-            | sed -E -e 's|/boot/loader/entries/||' \
-                     -e 's|.conf||')
+           | sed -E -e 's|/boot/loader/entries/||' \
+                    -e 's|.conf||')
     if echo "$snap" | grep -Eqv "^[0-9]{8}_[0-9]{6}"; then
         error "Ignoring entry $entry...\n"
         continue
