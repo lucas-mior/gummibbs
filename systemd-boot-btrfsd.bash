@@ -49,7 +49,7 @@ initramfs2=$(sed -nE \
 
 if [[ "$initramfs" != "$initramfs2" ]]; then
     error "Initramfs specified in boot entry ($initramfs)"
-    error "does not match the one in /proc/cmdline ($initramfs2)\n"
+    error " does not match the one in /proc/cmdline ($initramfs2)\n"
     exit 1
 fi
 
