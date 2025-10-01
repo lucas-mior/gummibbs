@@ -97,14 +97,14 @@ while : ; do
 
     if [ -n "$linux_used" ]; then
         grep -FRq -- "$linux_used" /boot/loader/entries/ \
-            || rm -f "/boot/$linux_used"
+            || rm -vf "/boot/$linux_used"
     fi
     if [ -n "$initrd_used" ]; then
         grep -FRq -- "$initrd_used" /boot/loader/entries/ \
-            || rm -f "/boot/$initrd_used"
+            || rm -vf "/boot/$initrd_used"
     fi
 
-    rm -f "$entry"
+    rm -vf "$entry"
 done
 
 if [ "$take_home_snapshot" = true ]; then
