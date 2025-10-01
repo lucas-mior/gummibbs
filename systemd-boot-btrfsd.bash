@@ -3,8 +3,8 @@
 # shellcheck disable=SC2001
 # shellcheck source=./systemd-boot-btrfsd-common.bash
 common="systemd-boot-btrfsd-common.bash"
-if ! source ./$common; then
-    if ! source /lib/$common; then
+if ! source /lib/$common; then
+    if ! source ./$common; then
         >&2 printf "Error sourcing $common.\n"
         exit 1
     fi
@@ -40,12 +40,15 @@ if test -z "$initramfs"; then
     error " as the name of the initramfs generator to keep track of it.\n"
     exit 1
 fi
-initramfs2=$(sed -nE \
-                 -e '/initrd/{
-                         s/initrd=(.+(initramfs|mkinitcpio|booster|dracut).+\.img).+/\1/;
-                         s|\\|/|;
-                         p;
-                     }' /proc/cmdline)
+initramfs2=$(sed -nE -e '
+             /initrd/{
+                s/initrd=(.+initramfs.+\.img).+/\1/;
+                s/initrd=(.+mkinitcpio.+\.img).+/\1/;
+                s/initrd=(.+booster.+\.img).+/\1/;
+                s/initrd=(.+dracut.+\.img).+/\1/;
+                s|\\|/|;
+                p;
+             }' /proc/cmdline)
 
 if [[ "$initramfs" != "$initramfs2" ]]; then
     error "Initramfs specified in boot entry ($initramfs)"
@@ -148,7 +151,7 @@ get_kernel_type () {
         kernel_type="linux"
     else
         error "Unknown kernel type $1.\n"
-        exit $fatal_error
+        exit "$fatal_error"
     fi
     echo "$kernel_type"
 }
