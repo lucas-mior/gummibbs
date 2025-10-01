@@ -71,10 +71,14 @@ get_count () {
     tr -cd '\0' | wc -c
 }
 
+get_files () {
+    find "$dir" -mindepth 1 -maxdepth 1 -printf "%f\0"
+}
+
 
 while : ; do
     tmpfile=$(mktemp)
-    find "$dir" -mindepth 1 -maxdepth 1 -print0 > "$tmpfile"
+    get_files "$dir" > "$tmpfile"
 
     if [ "$(cat "$tmpfile" | get_count)" -le "$max_of_kind" ]; then
         rm "$tmpfile"
@@ -107,7 +111,7 @@ done
 if [ "$take_home_snapshot" = true ]; then
     while : ; do
         tmpfile=$(mktemp)
-        find "/home/$dir" -mindepth 1 -maxdepth 1 -print0 > "$tmpfile"
+        get_files "/home/$dir" > "$tmpfile"
         if [ "$(cat "$tmpfile" | get_count)" -le "$max_of_kind" ]; then
             rm "$tmpfile"
             break
