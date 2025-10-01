@@ -32,7 +32,8 @@ fi
 
 mkdir -p "$dir"
 
-if echo "$btrfs_subvol_show_root" | head -n 1 | grep -Fq -- "$snapshots"; then
+subvol_root=$(echo "$btrfs_subvol_show_root" | head -n 1)
+if [[ $subvol_root ==  "$snapshots" ]]; then
     error "Snapshot mounted. Exiting...\n"
     exit 1
 fi
