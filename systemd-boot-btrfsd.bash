@@ -131,6 +131,21 @@ is_valid () {
     return 1
 }
 
+get_kernel_type () {
+    if echo "$kernel" | grep -Eq -- "-lts$"; then
+        kernel_type="linux-lts"
+    elif echo "$kernel" | grep -Eq -- "-hardened$"; then
+        kernel_type="linux-hardened"
+    elif echo "$kernel" | grep -Eq -- "-zen$"; then
+        kernel_type="linux-zen"
+    elif echo "$kernel" | grep -Eq -- "-arch"; then
+        kernel_type="linux"
+    else
+        error "Unknown kernel type $kernel.\n"
+        exit $fatal_error
+    fi
+}
+
 error "Generating boot entries for existing snapshots...\n"
 find "/$snapshots" -mindepth 2 -maxdepth 2 \
 | while read -r snapshot; do
@@ -156,18 +171,7 @@ find "/$snapshots" -mindepth 2 -maxdepth 2 \
              -type f -printf '%T@ %p\n' \
              | sort -nr | head -n1 \
              | awk -F/ '{print $(NF-1)}')
-    if echo "$kernel" | grep -Eq -- "-lts"; then
-        kernel_type="linux-lts"
-    elif echo "$kernel" | grep -Eq -- "-hardened"; then
-        kernel_type="linux-hardened"
-    elif echo "$kernel" | grep -Eq -- "-zen"; then
-        kernel_type="linux-zen"
-    elif echo "$kernel" | grep -Eq -- "-arch"; then
-        kernel_type="linux"
-    else
-        error "Unknown kernel type $kernel.\n"
-        exit $fatal_error
-    fi
+    kernel_type=$(get_kernel_type "$kernel")
 
     rm -rf "/tmp/$script"
     mkdir -p "/tmp/$script"
@@ -292,19 +296,7 @@ done
 trap cleanup EXIT
 touch "$lock"
 
-kernel=$(uname -r)
-if echo "$kernel" | grep -Eq -- "-lts$"; then
-    kernel_type="linux-lts"
-elif echo "$kernel" | grep -Eq -- "-hardened$"; then
-    kernel_type="linux-hardened"
-elif echo "$kernel" | grep -Eq -- "-zen$"; then
-    kernel_type="linux-zen"
-elif echo "$kernel" | grep -Eq -- "-arch"; then
-    kernel_type="linux"
-else
-    error "Unknown kernel type $kernel.\n"
-    exit $fatal_error
-fi
+kernel_type=$(get_kernel_type "$(uname -r)")
 
 linux=$(savefrom             "/boot/vmlinuz-$kernel_type")
 initrd_mkinitcpio=$(savefrom "/boot/initramfs-$kernel_type.img")
