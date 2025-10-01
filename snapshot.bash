@@ -64,7 +64,7 @@ case $kind in
 esac
 
 get_first () {
-    sort -z | head -z -n 1 | tr -d '\0'
+    sort -z "$1" | head -z -n 1 | tr -d '\0'
 }
 
 get_count () {
@@ -72,7 +72,7 @@ get_count () {
 }
 
 get_files () {
-    find "$dir" -mindepth 1 -maxdepth 1 -printf "%f\0"
+    find "$1" -mindepth 1 -maxdepth 1 -printf "%f\0"
 }
 
 while : ; do
@@ -84,7 +84,7 @@ while : ; do
         break
     fi
 
-    oldest=$(cat "$tmpfile" | get_first)
+    oldest=$(get_first "$tmpfile")
     set -x
     btrfs subvol delete "$dir/$oldest"
     set +x
@@ -115,7 +115,7 @@ if [ "$take_home_snapshot" = true ]; then
             rm "$tmpfile"
             break
         fi
-        oldest=$(cat "$tmpfile" | get_first)
+        oldest=$(get_first "$tmpfile")
         set -x
         btrfs subvol delete "/home/$dir/$oldest"
         set +x
