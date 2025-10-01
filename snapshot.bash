@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# shellcheck disable=SC2012
-
 shopt -s nullglob
 
 error () {
@@ -65,12 +63,17 @@ case $kind in
        exit 1 ;;
 esac
 
-while [ "$(ls -- "$dir" | wc -l)" -gt "$max_of_kind" ]; do
-    oldest="$(ls -- "$dir" | sort | head -n 1)"
+while : ; do
+    files=$(find "$dir" -mindepth 1 -maxdepth 1 -printf '%f\n')
+    if [ "$(echo "$files" | wc -l)" -le "$max_of_kind" ]; then
+        break
+    fi
+    oldest="$(echo "$files" | sort | head -n 1)"
+
     btrfs subvol delete "$dir/$oldest"
     entry="/boot/loader/entries/$oldest.conf"
 
-    linux_used="$(awk  '/^linux/  {print $NF}' "$entry")"
+    linux_used="$(awk '/^linux/  {print $NF}' "$entry")"
     initrd_used="$(awk '/^initrd/ {print $NF}' "$entry")"
 
     if [ -n "$linux_used" ]; then
@@ -86,9 +89,15 @@ while [ "$(ls -- "$dir" | wc -l)" -gt "$max_of_kind" ]; do
 done
 
 if [ "$take_home_snapshot" = true ]; then
-    while [ "$(ls -- "/home/$dir" | wc -l)" -gt "$max_of_kind" ]; do
-        oldest="$(ls -- "/home/$dir" | sort | head -n 1)"
+    while : ; do
+        files=$(find "/home/$dir" -mindepth 1 -maxdepth 1 -printf '%f\n')
+        if [ "$(echo "$files" | wc -l)" -le "$max_of_kind" ]; then
+            break
+        fi
+        oldest="$(echo "$files" | sort | head -n 1)"
+        set -x
         btrfs subvol delete "/home/$dir/$oldest"
+        set +x
     done
 fi
 
