@@ -19,6 +19,8 @@ is_valid () {
 }
 
 config="/etc/systemd-boot-btrfsd.conf"
+snapshots="/.snapshots/"
+lock="/var/lib/pacman/db.lck"
 
 if [ ! -f /etc/os-release ] || ! grep -q '^ID=arch' /etc/os-release; then
     error "Not running Arch Linux. Exiting...\n"
@@ -39,8 +41,6 @@ if command -v dracut >/dev/null 2>&1; then
     error "Dracut detected. Exiting..."
     exit 1
 fi
-
-snapshots="/.snapshots/"
 
 if ! btrfs_subvol_show_root=$(btrfs subvol show /); then
     error "Error running btrfs subvol show /."

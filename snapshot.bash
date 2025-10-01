@@ -1,8 +1,13 @@
 #!/bin/bash
 
 # shellcheck source=./systemd-boot-btrfsd-common.bash
-source ./systemd-boot-btrfsd-common.bash \
- || source /lib/systemd-boot-btrfsd-common.bash
+common=systemd-boot-btrfsd-common.bash
+if ! source ./$common; then
+    if ! source /lib/$common; then
+        >&2 printf "Error sourcing $common.\n"
+        exit
+    fi
+fi
 
 if [ -z "$1" ]; then
     error "usage: $(basename "$0") <kind of snapshot>\n"
@@ -10,7 +15,6 @@ if [ -z "$1" ]; then
 fi
 
 kind="$1"
-lock="/var/lib/pacman/db.lck"
 
 dir="/$snapshots/$kind"
 
