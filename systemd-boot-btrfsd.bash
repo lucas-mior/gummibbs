@@ -77,7 +77,6 @@ for entry in /boot/loader/entries/*.conf; do
     done
 done
 
-lock="/var/lib/pacman/db.lck"
 cleanup() {
     grep -F "$snapshots" /proc/mounts \
         | while read -r fs; do
