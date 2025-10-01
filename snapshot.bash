@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# shellcheck source=./systemd-boot-btrfsd-common.bash
 source /lib/systemd-boot-btrfs-common.bash
 
 if [ -z "$1" ]; then

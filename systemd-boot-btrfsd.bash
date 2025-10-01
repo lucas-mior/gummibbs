@@ -2,7 +2,6 @@
 
 # shellcheck disable=SC2001,SC2181,SC2317
 
-printf "\n$0\n\n"
 script=$(basename "$0")
 
 # shellcheck source=./systemd-boot-btrfsd-common.bash
@@ -11,11 +10,6 @@ source /lib/systemd-boot-btrfs-common.bash
 set -E
 fatal_error=2
 trap '[ "$?" = "$fatal_error" ] && exit $fatal_error' ERR
-
-if btrfs subvol show / | head -n 1 | grep -Eq -- "$snapshots"; then
-    error "Snapshot mounted. Exiting...\n"
-    exit 1
-fi
 
 subvol=$(btrfs subvol show / | awk '/Name:/{print $NF}')
 if echo "$subvol" | grep -Eq "^[0-9]{8}_[0-9]{6}"; then
