@@ -68,7 +68,7 @@ get_first () {
 }
 
 get_count () {
-    tr -cd '\0' | wc -c
+    tr -cd '\0' < "$1" | wc -c
 }
 
 get_files () {
@@ -79,7 +79,7 @@ while : ; do
     tmpfile=$(mktemp)
     get_files "$dir" > "$tmpfile"
 
-    if [ "$(get_count < "$tmpfile")" -le "$max_of_kind" ]; then
+    if [ "$(get_count "$tmpfile")" -le "$max_of_kind" ]; then
         rm "$tmpfile"
         break
     fi
@@ -111,7 +111,7 @@ if [ "$take_home_snapshot" = true ]; then
     while : ; do
         tmpfile=$(mktemp)
         get_files "/home/$dir" > "$tmpfile"
-        if [ "$(get_count < "$tmpfile")" -le "$max_of_kind" ]; then
+        if [ "$(get_count "$tmpfile")" -le "$max_of_kind" ]; then
             rm "$tmpfile"
             break
         fi
