@@ -322,7 +322,7 @@ kernel_type=$(get_kernel_type "$(uname -r)")
 linux=$(savefrom      "/boot/vmlinuz-$kernel_type")
 mkinitcpio=$(savefrom "/boot/mkinitcpio-$kernel_type.img")
 booster=$(savefrom    "/boot/booster-$kernel_type.img")
-dracut=$(savefrom    "/boot/dracut-$kernel_type.img")
+dracut=$(savefrom     "/boot/dracut-$kernel_type.img")
 
 if test -z "$mkinitcpio" && test -z "$booster"; then
     error "Error creating configuration for initramfs.\n"
