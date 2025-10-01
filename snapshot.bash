@@ -79,7 +79,7 @@ while : ; do
     tmpfile=$(mktemp)
     get_files "$dir" > "$tmpfile"
 
-    if [ "$(cat "$tmpfile" | get_count)" -le "$max_of_kind" ]; then
+    if [ "$(get_count < "$tmpfile")" -le "$max_of_kind" ]; then
         rm "$tmpfile"
         break
     fi
@@ -111,7 +111,7 @@ if [ "$take_home_snapshot" = true ]; then
     while : ; do
         tmpfile=$(mktemp)
         get_files "/home/$dir" > "$tmpfile"
-        if [ "$(cat "$tmpfile" | get_count)" -le "$max_of_kind" ]; then
+        if [ "$(get_count < "$tmpfile")" -le "$max_of_kind" ]; then
             rm "$tmpfile"
             break
         fi
