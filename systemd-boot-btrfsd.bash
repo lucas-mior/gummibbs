@@ -36,7 +36,7 @@ fi
 initramfs=$(awk '/^initrd .+(mkinitcpio|booster|dracut)/{print $NF}' \
                 "/boot/loader/entries/$template")
 if test -z "$initramfs"; then
-    error "You must set the initramfs prefix"
+    error "You must set the initramfs.img prefix"
     error " as the name of the initramfs generator to keep track of it.\n"
 fi
 initramfs2=$(sed -nE \
