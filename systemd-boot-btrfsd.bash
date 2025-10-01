@@ -279,6 +279,7 @@ find "/$snapshots" -mindepth 2 -maxdepth 2 \
     else
         error "Error generating initramfs:"
         error " mkinitcpio, booster and dracut failed.\n"
+        exit "$fatal_error"
     fi
 
     sed -E \
