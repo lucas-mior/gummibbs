@@ -4,8 +4,13 @@
 
 shopt -s nullglob
 
+error () {
+    >&2 printf "$@"
+    return
+}
+
 if [ -z "$1" ]; then
-    echo "usage: $(basename "$0") <kind of snapshot>"
+    error "usage: $(basename "$0") <kind of snapshot>\n"
     exit 1
 fi
 
@@ -16,12 +21,12 @@ lock="/var/lib/pacman/db.lck"
 dir="/$snapshots/$kind"
 
 if btrfs subvol show / | head -n 1 | grep -Eq -- "$snapshots"; then
-    echo "$(basename "$0"):" "Snapshot mounted. Exiting..."
+    error "Snapshot mounted. Exiting...\n"
     exit 1
 fi
 
 if [ -e "$lock" ]; then
-    echo "$lock exists. You can't run this script while pacman is running."
+    error "$lock exists. You can't run this script while pacman is running.\n"
     exit 1
 fi
 
@@ -50,8 +55,8 @@ root_subvol="$(btrfs subvol show /     2>/dev/null | awk '/Name:/ {print $NF}')"
 home_subvol="$(btrfs subvol show /home 2>/dev/null | awk '/Name:/ {print $NF}')"
 
 if [ "$root_subvol" = "$home_subvol" ]; then
-    echo "Warning: / and /home are the same subvolume."
-    echo "Skipping /home snapshot and cleanup."
+    error "Warning: / and /home are the same subvolume.\n"
+    error "Skipping /home snapshot and cleanup.\n"
     take_home_snapshot=false
 else
     take_home_snapshot=true
