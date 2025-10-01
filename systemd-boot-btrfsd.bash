@@ -9,7 +9,7 @@ source /lib/systemd-boot-btrfsd-common.bash
 
 set -E
 fatal_error=2
-trap '[ "$?" = "$fatal_error" ] && exit $fatal_error' ERR
+trap 'test "$?" = "$fatal_error" && exit $fatal_error' ERR
 
 subvol=$(btrfs subvol show / | awk '/Name:/{print $NF}')
 if echo "$subvol" | grep -Eq "^[0-9]{8}_[0-9]{6}"; then
@@ -23,13 +23,13 @@ if echo "$subvol" | grep -Eq '([|/&\\$\(\)*+[]|])'; then
 fi
 
 template=$(bootctl | awk '/Current Entry:/ {print $NF}')
-if [ ! -e "/boot/loader/entries/$template" ]; then
+if ! test -e "/boot/loader/entries/$template"; then
     error "Template boot entry '$template' does not exist.\n"
     exit 1
 fi
 
 template2=$(awk '/default/ {print $NF}' "/boot/loader/loader.conf")
-if [ "$template2" != "$template" ]; then
+if test "$template2" != "$template"; then
     error "Default boot option ($template2)"
     error " is not the booted one ($template).\n"
     exit 1
@@ -38,7 +38,7 @@ fi
 subvol2=$(sed -En '/rootflags/{s/.*subvol=([^ ,;]*).*/\1/p}' \
                   "/boot/loader/entries/$template")
 
-if [ "$subvol" != "$subvol2" ]; then
+if test "$subvol" != "$subvol2"; then
     error "Root subvolume ($subvol)"
     error " is not the one specified in $template ($subvol2).\n"
     exit 1
@@ -55,14 +55,14 @@ for entry in /boot/loader/entries/*.conf; do
     fi
 
     match=$(find "/$snapshots/" -maxdepth 2 -name "$snap" | wc -l)
-    if [ "$match" = "0" ]; then
+    if test "$match" = "0"; then
         error "$snap not found\n"
         rm -v "$entry"
         continue
     fi
 
     linux=$(awk '/^linux/{printf("%s/%s\n", "/boot", $NF);}' "$entry")
-    if [ ! -e "$linux" ]; then
+    if ! test -e "$linux"; then
         error "Referenced kernel $linux no longer exists. Deleting entry...\n"
         rm -v "$entry"
         continue
@@ -70,7 +70,7 @@ for entry in /boot/loader/entries/*.conf; do
 
     initrds=$(awk '/^initrd/{printf("%s/%s\n", "/boot", $NF);}' "$entry")
     for initrd in $initrds; do
-        if [ ! -e "$initrd" ]; then
+        if ! test -e "$initrd"; then
             error "Referenced initrd $initrd does not exist."
             error " Deleting entry...\n"
             rm -v "$entry"
@@ -95,18 +95,18 @@ savefrom() {
     base=$(basename "$current" | sed -E 's/\..+//')
     ext=$(basename "$current" | sed -E 's/[^.]+(\..+)?/\1/')
 
-    if [ -z "$snapdate" ]; then
+    if test -z "$snapdate"; then
         error "\$snapdate must be set.\n"
         exit 1
     fi
 
-    if [ ! -s "$current" ]; then
+    if ! test -s "$current"; then
         error "$current is empty.\n"
         return 0
     fi
 
     for file in /boot/"$base"-*; do
-        if [ ! -e "$file" ]; then
+        if ! test -e "$file"; then
             continue
         fi
         if diff "$file" "$current" >/dev/null 2>&1; then
@@ -150,7 +150,7 @@ find "/$snapshots" -mindepth 2 -maxdepth 2 \
         exit "$fatal_error"
     fi
 
-    if [ -e "$entry" ]; then
+    if test -e "$entry"; then
         error "$entry already exists.\n"
         continue
     fi
@@ -173,7 +173,7 @@ find "/$snapshots" -mindepth 2 -maxdepth 2 \
 
     snapdate=$snap
     linux=$(savefrom "/tmp/$script/vmlinuz-$kernel_type" | sed 's|/boot/||')
-    if [ -z "$linux" ]; then
+    if test -z "$linux"; then
         error "Error creating configuration for snapshotted kernel.\n"
         continue
     fi
@@ -212,7 +212,7 @@ find "/$snapshots" -mindepth 2 -maxdepth 2 \
     initrd_mkinitcpio=$(echo "$initrd_mkinitcpio" | sed 's|/boot/||')
     initrd_booster=$(echo    "$initrd_booster"    | sed 's|/boot/||')
 
-    if [ -z "$initrd_mkinitcpio" ] && [ -z "$initrd_booster" ]; then
+    if test -z "$initrd_mkinitcpio" && test -z "$initrd_booster"; then
         error "\nError creating initramfs for $snapdate.\n\n"
         continue
     fi
@@ -225,17 +225,17 @@ find "/$snapshots" -mindepth 2 -maxdepth 2 \
         "/boot/loader/entries/$template" \
         | tee "$entry"
 
-    if [ -n "$initrd_mkinitcpio" ] && [ -z "$initrd_booster" ]; then
+    if test -n "$initrd_mkinitcpio" && test -z "$initrd_booster"; then
         sed -i -E \
             -e "s|^initrd .+/initramfs.*|initrd /$initrd_mkinitcpio|" \
             -e "s|^initrd .+/booster.*|initrd /$initrd_mkinitcpio|" \
             -e "s|//+|/|g" "$entry"
-    elif [ -z "$initrd_mkinitcpio" ] && [ -n "$initrd_booster" ]; then
+    elif test -z "$initrd_mkinitcpio" && test -n "$initrd_booster"; then
         sed -i -E \
             -e "s|^initrd .+/initramfs.*|initrd /$initrd_booster|" \
             -e "s|^initrd .+/booster.*|initrd /$initrd_booster|" \
             -e "s|//+|/|g" "$entry"
-    elif [ -n "$initrd_mkinitcpio" ] && [ -n "$initrd_booster" ]; then
+    elif test -n "$initrd_mkinitcpio" && test -n "$initrd_booster"; then
         error "Warning: Both mkinitcpio and booster detected on snapshot.\n"
         sed -i -E \
             -e "s|^initrd .+/initramfs.*|initrd /$initrd_mkinitcpio|" \
@@ -254,7 +254,7 @@ while true; do
 snap=$(inotifywait \
        --format "%w %f%n" \
        -e create "/$snapshots/"{manual,boot,hour,day,week,month})
-if [ $? != 0 ] || [ -z "$snap" ]; then
+if test $? != 0 || test -z "$snap"; then
     error "Error in inotifywait.\n"
     exit 1
 fi
@@ -272,11 +272,11 @@ fi
 
 sleep 2
 n=0
-while [ -e "$lock" ]; do
+while test -e "$lock"; do
     error "$lock exists. Trying again in 5 seconds..."
     sleep 5
     n=$((n+1))
-    if [ $n -gt 12 ]; then
+    if test $n -gt 12; then
         error "Timeout waiting for $lock. Continuing..."
         continue
     fi
@@ -291,12 +291,12 @@ linux=$(savefrom             "/boot/vmlinuz-$kernel_type")
 initrd_mkinitcpio=$(savefrom "/boot/initramfs-$kernel_type.img")
 initrd_booster=$(savefrom    "/boot/booster-$kernel_type.img")
 
-if [ -z "$initrd_mkinitcpio" ] && [ -z "$initrd_booster" ]; then
+if test -z "$initrd_mkinitcpio" && test -z "$initrd_booster"; then
     error "Error creating configuration for initramfs.\n"
     exit $fatal_error
 fi
 
-if [ -z "$linux" ]; then
+if test -z "$linux"; then
     error "Error creating configuration for kernel.\n"
     exit $fatal_error
 fi
