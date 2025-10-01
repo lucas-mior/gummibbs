@@ -140,8 +140,9 @@ savefrom() {
     done
 
     conf="${base}-${snapdate}${ext}"
-    cp -f "$current" "/boot/$conf" >/dev/null \
-        && printf "/boot/$conf\n"
+    if cp -f "$current" "/boot/$conf" >/dev/null; then
+        printf "/boot/$conf\n"
+    fi
 }
 
 get_kernel_type () {
