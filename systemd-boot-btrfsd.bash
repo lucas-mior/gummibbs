@@ -42,12 +42,12 @@ if test -z "$initramfs"; then
 fi
 initramfs2=$(sed -nE -e '
              /initrd/{
-                s/initrd=(.+initramfs.+\.img).+/\1/;
-                s/initrd=(.+mkinitcpio.+\.img).+/\1/;
-                s/initrd=(.+booster.+\.img).+/\1/;
-                s/initrd=(.+dracut.+\.img).+/\1/;
-                s|\\|/|;
-                p;
+                 s/initrd=(.+initramfs.+\.img).+/\1/;
+                 s/initrd=(.+mkinitcpio.+\.img).+/\1/;
+                 s/initrd=(.+booster.+\.img).+/\1/;
+                 s/initrd=(.+dracut.+\.img).+/\1/;
+                 s|\\|/|;
+                 p;
              }' /proc/cmdline)
 
 if [[ "$initramfs" != "$initramfs2" ]]; then
