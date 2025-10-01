@@ -48,7 +48,8 @@ if ! btrfs_subvol_show_root=$(btrfs subvol show /); then
     exit 2
 fi
 
-if btrfs subvol show / | head -n 1 | grep -Eq -- "$snapshots"; then
+subvol_root=$(echo "$btrfs_subvol_show_root" | head -n 1)
+if [[ $subvol_root ==  "$snapshots" ]]; then
     error "Snapshot mounted. Exiting...\n"
     exit 1
 fi

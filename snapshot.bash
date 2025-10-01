@@ -25,12 +25,6 @@ fi
 
 mkdir -p "$dir"
 
-subvol_root=$(echo "$btrfs_subvol_show_root" | head -n 1)
-if [[ $subvol_root ==  "$snapshots" ]]; then
-    error "Snapshot mounted. Exiting...\n"
-    exit 1
-fi
-
 if [ -e "$lock" ]; then
     error "$lock exists. You can't run this script while pacman is running.\n"
     exit 1
