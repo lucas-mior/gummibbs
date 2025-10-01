@@ -140,7 +140,7 @@ savefrom() {
     done
 
     conf="${base}-${snapdate}${ext}"
-    if cp -f "$current" "/boot/$conf" >/dev/null; then
+    if cp -vf "$current" "/boot/$conf" >/dev/null; then
         printf "/boot/$conf\n"
     fi
 }
