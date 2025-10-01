@@ -5,7 +5,7 @@
 script=$(basename "$0")
 
 # shellcheck source=./systemd-boot-btrfsd-common.bash
-source /lib/systemd-boot-btrfs-common.bash
+source /lib/systemd-boot-btrfsd-common.bash
 
 set -E
 fatal_error=2
