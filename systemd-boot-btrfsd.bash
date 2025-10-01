@@ -191,7 +191,7 @@ find "/$snapshots" -mindepth 2 -maxdepth 2 \
     if ! arch-chroot "$snapshot" \
         mkinitcpio \
         -k "/mnt/$script/vmlinuz-$kernel_type" \
-        -g "/mnt/$script/initramfs-$kernel_type.img"; then
+        -g "/mnt/$script/mkinitcpio-$kernel_type.img"; then
         set +x
         error "\nError generating initramfs using mkinitcpio.\n\n"
     fi
@@ -203,54 +203,65 @@ find "/$snapshots" -mindepth 2 -maxdepth 2 \
         set +x
         error "\nError generating initramfs using booster.\n\n"
     fi
+    set -x
+    if ! arch-chroot "$snapshot" \
+        dracut \
+        --kver "$kernel" \
+        "/mnt/$script/dracut-$kernel_type.img"; then
+        set +x
+        error "\nError generating initramfs using dracut.\n\n"
+    fi
     set +x
 
     umount -v "$snapshot/mnt"
     umount -v "$snapshot"
 
-    initrd_mkinitcpio=$(savefrom "/tmp/$script/initramfs-$kernel_type.img")
-    initrd_booster=$(savefrom    "/tmp/$script/booster-$kernel_type.img")
+    mkinitcpio=$(savefrom "/tmp/$script/mkinitcpio-$kernel_type.img")
+    booster=$(savefrom    "/tmp/$script/booster-$kernel_type.img")
+    dracut=$(savefrom     "/tmp/$script/dracut-$kernel_type.img")
 
-    initrd_mkinitcpio=$(echo "$initrd_mkinitcpio" | sed 's|/boot/||')
-    initrd_booster=$(echo    "$initrd_booster"    | sed 's|/boot/||')
+    mkinitcpio=$(echo "$mkinitcpio" | sed 's|/boot/||')
+    booster=$(echo    "$booster"    | sed 's|/boot/||')
+    dracut=$(echo     "$dracut"     | sed 's|/boot/||')
 
-    if test -z "$initrd_mkinitcpio" && test -z "$initrd_booster"; then
+    if test -z "$mkinitcpio" && test -z "$booster" && test -z "$dracut"; then
         error "\nError creating initramfs for $snapdate.\n\n"
         continue
+    fi
+
+    if test -n "$mkinitcpio" \
+        && { test -n "$booster" || test -n "$dracut"; }; then
+        error "Warning: Snapshot has more than one initramfs generator.\n"
+        error "Defaulting to mkinitcpio...\n"
+    elif test -n "$booster" \
+        && { test -n "$mkinitcpio" || test -n "$dracut"; }; then
+        error "Warning: Snapshot has more than one initramfs generator.\n"
+        error "Defaulting to booster...\n"
+    elif test -n "$dracut" \
+        && { test -n "$mkinitcpio" || test -n "$booster"; }; then
+        error "Warning: Snapshot has more than one initramfs generator.\n"
+        error "Defaulting to dracut...\n"
+    fi
+
+    if test -n "$mkinitcpio"; then
+        initramfs="$mkinitcpio"
+    elif test -n "$booster"; then
+        initramfs="$booster"
+    elif test -n "$dracut"; then
+        initramfs="$dracut"
     fi
 
     sed -E \
         -e "s|^title .+|title $kind/$snap|" \
         -e "s|subvol=$subvol|subvol=$subvol/.snapshots/$kind/$snap|" \
         -e "s|^linux .+/vmlinuz-linux.*|linux /$linux|" \
+        -e "s|^initrd .+/(initramfs|mkinitcpio|booster|dracut)/initrd /$initramfs|" \
         -e "s|//+|/|g" \
         "/boot/loader/entries/$template" \
         | tee "$entry"
-
-    if test -n "$initrd_mkinitcpio" && test -z "$initrd_booster"; then
-        sed -i -E \
-            -e "s|^initrd .+/initramfs.*|initrd /$initrd_mkinitcpio|" \
-            -e "s|^initrd .+/booster.*|initrd /$initrd_mkinitcpio|" \
-            -e "s|//+|/|g" "$entry"
-    elif test -z "$initrd_mkinitcpio" && test -n "$initrd_booster"; then
-        sed -i -E \
-            -e "s|^initrd .+/initramfs.*|initrd /$initrd_booster|" \
-            -e "s|^initrd .+/booster.*|initrd /$initrd_booster|" \
-            -e "s|//+|/|g" "$entry"
-    elif test -n "$initrd_mkinitcpio" && test -n "$initrd_booster"; then
-        error "Warning: Both mkinitcpio and booster detected on snapshot.\n"
-        sed -i -E \
-            -e "s|^initrd .+/initramfs.*|initrd /$initrd_mkinitcpio|" \
-            -e "s|^initrd .+/booster.*|initrd /$initrd_booster|" \
-            -e "s|//+|/|g" "$entry"
-    else
-        error "This condition should have been discarded before.\n"
-        exit $fatal_error
-    fi
-
 done
 
-unset kind snap snapshot linux initrd_mkinitcpio initrd_booster
+unset kind snap snapshot linux mkinitcpio booster
 
 while true; do
 snap=$(inotifywait \
@@ -290,10 +301,10 @@ touch "$lock"
 kernel_type=$(get_kernel_type "$(uname -r)")
 
 linux=$(savefrom             "/boot/vmlinuz-$kernel_type")
-initrd_mkinitcpio=$(savefrom "/boot/initramfs-$kernel_type.img")
-initrd_booster=$(savefrom    "/boot/booster-$kernel_type.img")
+mkinitcpio=$(savefrom "/boot/initramfs-$kernel_type.img")
+booster=$(savefrom    "/boot/booster-$kernel_type.img")
 
-if test -z "$initrd_mkinitcpio" && test -z "$initrd_booster"; then
+if test -z "$mkinitcpio" && test -z "$booster"; then
     error "Error creating configuration for initramfs.\n"
     exit $fatal_error
 fi
@@ -304,8 +315,8 @@ if test -z "$linux"; then
 fi
 
 linux=$(echo "$linux"                         | sed 's|/boot/||')
-initrd_mkinitcpio=$(echo "$initrd_mkinitcpio" | sed 's|/boot/||')
-initrd_booster=$(echo "$initrd_booster"       | sed 's|/boot/||')
+mkinitcpio=$(echo "$mkinitcpio" | sed 's|/boot/||')
+booster=$(echo "$booster"       | sed 's|/boot/||')
 
 kind="$(echo "$kind" | sed 's|/||g')"
 
@@ -313,8 +324,8 @@ sed -E \
     -e "s|^title .+|title   $kind/$snapdate|;" \
     -e "s|subvol=$subvol|subvol=$subvol/$snapshots/$kind/$snapdate|" \
     -e "s|^linux .+/vmlinuz-linux.*|linux /$linux|" \
-    -e "s|^initrd .+/initramfs-linux.*\.img$|initrd /$initrd_mkinitcpio|" \
-    -e "s|^initrd .+/booster-linux.*\.img$|initrd /$initrd_booster|" \
+    -e "s|^initrd .+/initramfs-linux.*\.img$|initrd /$mkinitcpio|" \
+    -e "s|^initrd .+/booster-linux.*\.img$|initrd /$booster|" \
     -e "s|//+|/|g" \
     "/boot/loader/entries/$template" \
     | tee "/boot/loader/entries/$snapdate.conf"
