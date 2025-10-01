@@ -20,7 +20,13 @@ lock="/var/lib/pacman/db.lck"
 
 dir="/$snapshots/$kind"
 
-if btrfs subvol show / | head -n 1 | grep -Eq -- "$snapshots"; then
+if ! btrfs_subvol_show=$(btrfs subvol show /); then
+    error "Error running btrfs subvol show /."
+    error "Are your using btrfs?"
+    exit 2
+fi
+
+if echo "$btrfs_subvol_show" | head -n 1 | grep -Eq -- "$snapshots"; then
     error "Snapshot mounted. Exiting...\n"
     exit 1
 fi
