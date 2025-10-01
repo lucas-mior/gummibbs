@@ -178,12 +178,17 @@ find "/$snapshots" -mindepth 2 -maxdepth 2 \
         continue
     fi
 
-    if ! grep -q "\b$snapshot\b" /proc/mounts; then
-        mount -v --bind "$snapshot" "$snapshot"
+    if grep -q "\b$snapshot\b" /proc/mounts; then
+        error "Snapshot $snapshot is mounted. This should not be the case.\n"
+        exit 2
     fi
-    if ! grep -q "\b$snapshot/mnt/\b" /proc/mounts; then
-        mount -v --bind "/tmp/" "$snapshot/mnt/" --mkdir
+    if grep -q "\b$snapshot/mnt/\b" /proc/mounts; then
+        error "Snapshot $snapshot is mounted. This should not be the case.\n"
+        exit 2
     fi
+
+    mount -v --bind "$snapshot" "$snapshot"
+    mount -v --bind "/tmp/" "$snapshot/mnt/" --mkdir
 
     set -x
     if ! arch-chroot "$snapshot" \
