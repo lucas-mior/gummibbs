@@ -71,11 +71,11 @@ while [ "$(ls -- "$dir" | wc -l)" -gt "$max_of_kind" ]; do
     initrd_used="$(awk '/^initrd/ {print $NF}' "$entry")"
 
     if [ -n "$linux_used" ]; then
-        grep -FR -- "$linux_used" /boot/loader/entries/ \
+        grep -FRq -- "$linux_used" /boot/loader/entries/ \
             || rm -f "/boot/$linux_used"
     fi
     if [ -n "$initrd_used" ]; then
-        grep -FR -- "$initrd_used" /boot/loader/entries/ \
+        grep -FRq -- "$initrd_used" /boot/loader/entries/ \
             || rm -f "/boot/$initrd_used"
     fi
 
