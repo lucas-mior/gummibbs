@@ -79,12 +79,14 @@ while : ; do
     initrd_used="$(awk '/^initrd/ {print $NF}' "$entry")"
 
     if [ -n "$linux_used" ]; then
-        grep -FRq -- "$linux_used" /boot/loader/entries/ \
-            || rm -vf "/boot/$linux_used"
+        if ! grep -FRq -- "$linux_used" /boot/loader/entries/; then
+            rm -vf "/boot/$linux_used"
+        fi
     fi
     if [ -n "$initrd_used" ]; then
-        grep -FRq -- "$initrd_used" /boot/loader/entries/ \
-            || rm -vf "/boot/$initrd_used"
+        if ! grep -FRq -- "$initrd_used" /boot/loader/entries/; then
+            rm -vf "/boot/$initrd_used"
+        fi
     fi
 
     rm -vf "$entry"
