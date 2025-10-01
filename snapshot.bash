@@ -35,7 +35,7 @@ fi
 
 mkdir -p "$dir"
 
-if echo "$btrfs_subvol_show_root" | head -n 1 | grep -Eq -- "$snapshots"; then
+if echo "$btrfs_subvol_show_root" | head -n 1 | grep -Fq -- "$snapshots"; then
     error "Snapshot mounted. Exiting...\n"
     exit 1
 fi
@@ -64,24 +64,29 @@ case $kind in
 esac
 
 get_first () {
-    sort -z | head -z -n 1 | tr '\0' '\n' | awk -F'/' '{print $NF}'
+    sort -z | head -z -n 1 | tr -d '\0' | awk -F'/' '{print $NF}'
 }
 
 get_count () {
-    tr -cd '\0' | tr '\0' '\n' | wc -l
+    tr -cd '\0' | wc -c
 }
 
-while : ; do
-    find "$dir" -mindepth 1 -maxdepth 1 -print0 > /tmp/snapshots
 
-    if [ "$(cat /tmp/snapshots | get_count)" -le "$max_of_kind" ]; then
+while : ; do
+    tmpfile=$(mktemp)
+    find "$dir" -mindepth 1 -maxdepth 1 -print0 > "$tmpfile"
+
+    if [ "$(cat "$tmpfile" | get_count)" -le "$max_of_kind" ]; then
+        rm "$tmpfile"
         break
     fi
 
-    oldest=$(cat /tmp/snapshots | get_first)
+    oldest=$(cat "$tmpfile" | get_first)
     set -x
     btrfs subvol delete "$dir/$oldest"
     set +x
+    rm "$tmpfile"
+
     entry="/boot/loader/entries/$oldest.conf"
 
     linux_used="$(awk '/^linux/  {print $NF}' "$entry")"
@@ -97,26 +102,27 @@ while : ; do
     fi
 
     rm -f "$entry"
-    break
 done
 
 if [ "$take_home_snapshot" = true ]; then
     while : ; do
-        find "/home/$dir" -mindepth 1 -maxdepth 1 -print0 > /tmp/snapshots
-        if [ "$(cat /tmp/snapshots | get_count)" -le "$max_of_kind" ]; then
+        tmpfile=$(mktemp)
+        find "/home/$dir" -mindepth 1 -maxdepth 1 -print0 > "$tmpfile"
+        if [ "$(cat "$tmpfile" | get_count)" -le "$max_of_kind" ]; then
+            rm "$tmpfile"
             break
         fi
-        oldest=$(cat /tmp/snapshots | get_first)
+        oldest=$(cat "$tmpfile" | get_first)
         set -x
         btrfs subvol delete "/home/$dir/$oldest"
         set +x
-        break
+        rm "$tmpfile"
     done
 fi
 
-date="$(date +"%Y%m%d_%H%M%S")"
+snapdate="$(date +"%Y%m%d_%H%M%S")"
 
-btrfs subvolume snapshot / "$dir/$date"
+btrfs subvolume snapshot / "$dir/$snapdate"
 if [ "$take_home_snapshot" = true ]; then
-    btrfs subvolume snapshot /home "/home/$snapshots/$kind/$date"
+    btrfs subvolume snapshot /home "/home/$snapshots/$kind/$snapdate"
 fi
