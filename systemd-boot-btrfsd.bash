@@ -248,10 +248,9 @@ find "/$snapshots" -mindepth 2 -maxdepth 2 \
             -e "s|//+|/|g" "$entry"
     elif [ -n "$initrd_mkinitcpio" ] && [ -n "$initrd_booster" ]; then
         error "Warning: Both mkinitcpio and booster detected on snapshot.\n"
-        error "Defaulting to mkinitcpio...\n"
         sed -i -E \
             -e "s|^initrd .+/initramfs.*|initrd /$initrd_mkinitcpio|" \
-            -e "s|^initrd .+/booster.*|initrd /$initrd_mkinitcpio|" \
+            -e "s|^initrd .+/booster.*|initrd /$initrd_booster|" \
             -e "s|//+|/|g" "$entry"
     else
         error "This condition should have been discarded before.\n"
