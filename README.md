@@ -40,6 +40,12 @@ When run, this script first does some housekeeping:
     be selected)
 
 ## Installation
+### AUR
+```sh
+yay -S systemd-boot-btrfs-snapshots
+```
+
+### Manual
 ```sh
 # clone repository
 git clone https://github.com/lucas-mior/systemd-boot-btrfs-snapshots
