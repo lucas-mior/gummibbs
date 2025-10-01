@@ -87,7 +87,6 @@ cleanup() {
         umount -v "$fs"
     done
 
-    rm -v "$lock"
     rm -vrf "/tmp/$script/"
 }
 
