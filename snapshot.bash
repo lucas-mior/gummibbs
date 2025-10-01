@@ -20,13 +20,24 @@ lock="/var/lib/pacman/db.lck"
 
 dir="/$snapshots/$kind"
 
-if ! btrfs_subvol_show=$(btrfs subvol show /); then
+if ! btrfs_subvol_show_root=$(btrfs subvol show /); then
     error "Error running btrfs subvol show /."
     error "Are your using btrfs?"
     exit 2
 fi
 
-if echo "$btrfs_subvol_show" | head -n 1 | grep -Eq -- "$snapshots"; then
+if ! btrfs_subvol_show_home=$(btrfs subvol show /home 2>&1); then
+    error "Error running btrfs subvol show /home:\n"
+    error "$btrfs_subvol_show_home"
+    take_home_snapshot=false
+else
+    mkdir -p "/home/$dir"
+    take_home_snapshot=true
+fi
+
+mkdir -p "$dir"
+
+if echo "$btrfs_subvol_show_root" | head -n 1 | grep -Eq -- "$snapshots"; then
     error "Snapshot mounted. Exiting...\n"
     exit 1
 fi
@@ -53,20 +64,6 @@ case $kind in
        printf " kind of snapshot: {manual, boot, hour, day, week, month}"
        exit 1 ;;
 esac
-
-mkdir -p "$dir"
-mkdir -p "/home/$dir"
-
-root_subvol="$(btrfs subvol show /     2>/dev/null | awk '/Name:/ {print $NF}')"
-home_subvol="$(btrfs subvol show /home 2>/dev/null | awk '/Name:/ {print $NF}')"
-
-if [ "$root_subvol" = "$home_subvol" ]; then
-    error "Warning: / and /home are the same subvolume.\n"
-    error "Skipping /home snapshot and cleanup.\n"
-    take_home_snapshot=false
-else
-    take_home_snapshot=true
-fi
 
 while [ "$(ls -- "$dir" | wc -l)" -gt "$max_of_kind" ]; do
     oldest="$(ls -- "$dir" | sort | head -n 1)"
