@@ -5,38 +5,12 @@
 printf "\n$0\n\n"
 script=$(basename "$0")
 
-error () {
-    >&2 printf "$@"
-    return
-}
+# shellcheck source=./systemd-boot-btrfsd-common.bash
+source /lib/systemd-boot-btrfs-common.bash
 
 set -E
 fatal_error=2
 trap '[ "$?" = "$fatal_error" ] && exit $fatal_error' ERR
-
-export LC_ALL=C
-
-if [ ! -f /etc/os-release ] || ! grep -q '^ID=arch' /etc/os-release; then
-    error "Not running Arch Linux. Exiting...\n"
-    exit 1
-fi
-
-if ! bootctl status >/dev/null 2>&1; then
-    error "Not using systemd-boot. Exiting...\n"
-    exit 1
-fi
-
-if test -n "$(find /boot/ -maxdepth 1 -iname "*.efi" -print -quit)"; then
-    error "Unified kernel images detected in /boot. Exiting...\n"
-    exit 1
-fi
-
-if command -v dracut >/dev/null 2>&1; then
-    error "Dracut detected. Exiting..."
-    exit 1
-fi
-
-snapshots="/.snapshots/"
 
 if btrfs subvol show / | head -n 1 | grep -Eq -- "$snapshots"; then
     error "Snapshot mounted. Exiting...\n"
@@ -164,7 +138,7 @@ is_valid () {
 }
 
 error "Generating boot entries for existing snapshots...\n"
-find /$snapshots -mindepth 2 -maxdepth 2 \
+find "/$snapshots" -mindepth 2 -maxdepth 2 \
 | while read -r snapshot; do
     snapshot=$(echo "$snapshot" | sed -E 's|//|/|; s|/$||;')
     snap=$(echo "$snapshot" | awk -F'/' '{print $NF}')

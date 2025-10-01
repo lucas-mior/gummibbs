@@ -11,6 +11,7 @@ DESTDIR="${DESTDIR:-/}"
 
 program="snapshot.bash"
 program2="systemd-boot-btrfsd.bash"
+common="systemd-boot-btrfsd-common.bash"
 service="systemd-boot-btrfsd.service"
 hook="systemd-boot-btrfsd.hook"
 
@@ -20,12 +21,14 @@ case "$target" in
 "uninstall")
     rm -f ${DESTDIR}${PREFIX}/bin/${program}
     rm -f ${DESTDIR}${PREFIX}/bin/${program2}
+    rm -f ${DESTDIR}${PREFIX}/lib/${common}
     rm -f ${DESTDIR}${PREFIX}/lib/systemd/system/${service}
     rm -f ${DESTDIR}${PREFIX}/share/libalpm/hooks/${hook}
     ;;
 "install")
     install -Dm755 ${program}  ${DESTDIR}${PREFIX}/bin/${program}
     install -Dm755 ${program2} ${DESTDIR}${PREFIX}/bin/${program2}
+    install -Dm644 ${common}   ${DESTDIR}${PREFIX}/bin/${common}
     install -Dm644 ${service}  ${DESTDIR}${PREFIX}/lib/systemd/system/${service}
     install -Dm644 ${hook}     ${DESTDIR}${PREFIX}/share/libalpm/hooks/${hook}
     ;;
