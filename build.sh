@@ -14,6 +14,7 @@ program2="systemd-boot-btrfsd.bash"
 common="systemd-boot-btrfsd-common.bash"
 service="systemd-boot-btrfsd.service"
 hook="systemd-boot-btrfsd.hook"
+config="systemd-boot-btrfsd.conf"
 
 echo "0$0"
 
@@ -31,5 +32,6 @@ case "$target" in
     install -Dm644 ${common}   ${DESTDIR}${PREFIX}/lib/${common}
     install -Dm644 ${service}  ${DESTDIR}${PREFIX}/lib/systemd/system/${service}
     install -Dm644 ${hook}     ${DESTDIR}${PREFIX}/share/libalpm/hooks/${hook}
+    install -Dm644 ${config}   ${DESTDIR}/etc/${config}
     ;;
 esac

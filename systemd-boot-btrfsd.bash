@@ -120,16 +120,6 @@ savefrom() {
         && printf "/boot/$conf\n"
 }
 
-valid_kinds=(manual boot hour day week month)
-is_valid () {
-    for valid_kind in "${valid_kinds[@]}"; do
-        if [ "$valid_kind" = "$1" ]; then
-            return 0
-        fi
-    done
-    return 1
-}
-
 get_kernel_type () {
     if echo "$1" | grep -Eq -- "-lts$"; then
         kernel_type="linux-lts"

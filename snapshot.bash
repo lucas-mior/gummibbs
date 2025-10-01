@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck source=./systemd-boot-btrfsd-common.bash
-source /lib/systemd-boot-btrfsd-common.bash
+source ./systemd-boot-btrfsd-common.bash \
+ || source /lib/systemd-boot-btrfsd-common.bash
 
 if [ -z "$1" ]; then
     error "usage: $(basename "$0") <kind of snapshot>\n"
@@ -47,17 +48,11 @@ cleanup() {
 touch "$lock"
 trap cleanup EXIT
 
-case $kind in
-    "manual") max_of_kind=6 ;;
-    "boot")   max_of_kind=4  ;;
-    "hour")   max_of_kind=8  ;;
-    "day")    max_of_kind=8  ;;
-    "week")   max_of_kind=8  ;;
-    "month")  max_of_kind=12 ;;
-    *) printf "$0:"
-       printf " kind of snapshot: {manual, boot, hour, day, week, month}"
-       exit 1 ;;
-esac
+if ! is_valid "$kind"; then
+    error "Error: Invalid snapshot kind.\n"
+    exit 1
+fi
+max_of_kind=$(awk -F"[ =]" "/$kind/ {print \$2}" "$config")
 
 get_first () {
     sort -z "$1" | head -z -n 1 | tr -d '\0'

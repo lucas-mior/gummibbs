@@ -8,6 +8,18 @@ error () {
     return
 }
 
+valid_kinds=(manual boot hour day week month)
+is_valid () {
+    for valid_kind in "${valid_kinds[@]}"; do
+        if [ "$valid_kind" = "$1" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+config="/etc/systemd-boot-btrfsd.conf"
+
 if [ ! -f /etc/os-release ] || ! grep -q '^ID=arch' /etc/os-release; then
     error "Not running Arch Linux. Exiting...\n"
     exit 1
