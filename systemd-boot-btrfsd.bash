@@ -334,10 +334,10 @@ if test -z "$linux"; then
     exit $fatal_error
 fi
 
-linux=$(echo "$linux"                         | sed 's|/boot/||')
+linux=$(echo "$linux"           | sed 's|/boot/||')
 mkinitcpio=$(echo "$mkinitcpio" | sed 's|/boot/||')
 booster=$(echo "$booster"       | sed 's|/boot/||')
-dracut=$(echo "$dracut"       | sed 's|/boot/||')
+dracut=$(echo "$dracut"         | sed 's|/boot/||')
 
 kind="$(echo "$kind" | sed 's|/||g')"
 
