@@ -6,7 +6,7 @@ common="systemd-boot-btrfsd-common.bash"
 if ! source ./$common; then
     if ! source /lib/$common; then
         >&2 printf "Error sourcing $common.\n"
-        exit
+        exit 1
     fi
 fi
 
@@ -240,10 +240,6 @@ find "/$snapshots" -mindepth 2 -maxdepth 2 \
     booster=$(savefrom    "/tmp/$script/booster-$kernel_type.img")
     dracut=$(savefrom     "/tmp/$script/dracut-$kernel_type.img")
 
-    mkinitcpio=$(echo "$mkinitcpio" | sed 's|/boot/||')
-    booster=$(echo    "$booster"    | sed 's|/boot/||')
-    dracut=$(echo     "$dracut"     | sed 's|/boot/||')
-
     if test -z "$mkinitcpio" && test -z "$booster" && test -z "$dracut"; then
         error "\nError creating initramfs for $snapdate.\n\n"
         continue
@@ -263,6 +259,10 @@ find "/$snapshots" -mindepth 2 -maxdepth 2 \
         error "Defaulting to dracut...\n"
     fi
 
+    mkinitcpio=$(echo "$mkinitcpio" | sed 's|/boot/||')
+    booster=$(echo    "$booster"    | sed 's|/boot/||')
+    dracut=$(echo     "$dracut"     | sed 's|/boot/||')
+
     if test -n "$mkinitcpio"; then
         initramfs="$mkinitcpio"
     elif test -n "$booster"; then
@@ -275,7 +275,9 @@ find "/$snapshots" -mindepth 2 -maxdepth 2 \
         -e "s|^title .+|title $kind/$snap|" \
         -e "s|subvol=$subvol|subvol=$subvol/.snapshots/$kind/$snap|" \
         -e "s|^linux .+/vmlinuz-linux.*|linux /$linux|" \
-        -e "s|^initrd .+/(mkinitcpio|booster|dracut)|initrd /$initramfs|" \
+        -e "s|^initrd .+/mkinitcpio-linux.*\.img|initrd /$initramfs|" \
+        -e "s|^initrd .+/booster-linux.*\.img|initrd /$initramfs|" \
+        -e "s|^initrd .+/dracut-linux.*\.img|initrd /$dracut|" \
         -e "s|//+|/|g" \
         "/boot/loader/entries/$template" \
         | tee "$entry"
