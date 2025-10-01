@@ -42,7 +42,19 @@ fi
 
 snapshots="/.snapshots/"
 
+if ! btrfs_subvol_show_root=$(btrfs subvol show /); then
+    error "Error running btrfs subvol show /."
+    error "Are your using btrfs?"
+    exit 2
+fi
+
 if btrfs subvol show / | head -n 1 | grep -Eq -- "$snapshots"; then
     error "Snapshot mounted. Exiting...\n"
+    exit 1
+fi
+
+subvol=$(btrfs subvol show / | awk '/Name:/{print $NF}')
+if [[ $subvol =~ ^[0-9]{8}_[0-9]{6} ]]; then
+    error "Subvolume name matches date format. Exiting...\n"
     exit 1
 fi

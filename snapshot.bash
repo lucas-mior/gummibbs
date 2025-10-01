@@ -10,16 +10,9 @@ if [ -z "$1" ]; then
 fi
 
 kind="$1"
-snapshots=".snapshots"
 lock="/var/lib/pacman/db.lck"
 
 dir="/$snapshots/$kind"
-
-if ! btrfs_subvol_show_root=$(btrfs subvol show /); then
-    error "Error running btrfs subvol show /."
-    error "Are your using btrfs?"
-    exit 2
-fi
 
 if ! btrfs_subvol_show_home=$(btrfs subvol show /home 2>&1); then
     error "Error running btrfs subvol show /home:\n"
@@ -53,7 +46,7 @@ if ! is_valid "$kind"; then
     error "Error: Invalid snapshot kind.\n"
     exit 1
 fi
-max_of_kind=$(awk -F"[ =]" "/$kind/ {print \$2}" "$config")
+max_of_kind=$(awk -F"[ =]+" "/$kind/ {print \$2}" "$config")
 
 get_first () {
     sort -z "$1" | head -z -n 1 | tr -d '\0'
