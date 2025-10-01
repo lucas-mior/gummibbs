@@ -52,7 +52,7 @@ touch "$lock"
 trap cleanup EXIT
 
 case $kind in
-    "manual") max_of_kind=12 ;;
+    "manual") max_of_kind=6 ;;
     "boot")   max_of_kind=4  ;;
     "hour")   max_of_kind=8  ;;
     "day")    max_of_kind=8  ;;
@@ -63,14 +63,28 @@ case $kind in
        exit 1 ;;
 esac
 
+get_first () {
+    sort -z | head -z -n 1 | tr '\0' '\n' | awk -F'/' '{print $NF}'
+}
+
+get_count () {
+    tr -cd '\0' | tr '\0' '\n' | wc -l
+}
+
 while : ; do
-    files=$(find "$dir" -mindepth 1 -maxdepth 1 -printf '%f\n')
-    if [ "$(echo "$files" | wc -l)" -le "$max_of_kind" ]; then
+    find "$dir" -mindepth 1 -maxdepth 1 -print0 > /tmp/snapshots
+
+    count=$(cat /tmp/snapshots | get_count)
+    echo "count=$count"
+    if [ "$count" -le "$max_of_kind" ]; then
         break
     fi
-    oldest="$(echo "$files" | sort | head -n 1)"
+    oldest=$(cat /tmp/snapshots | get_first)
+    echo "oldest=$oldest"
 
+    set -x
     btrfs subvol delete "$dir/$oldest"
+    set +x
     entry="/boot/loader/entries/$oldest.conf"
 
     linux_used="$(awk '/^linux/  {print $NF}' "$entry")"
@@ -86,18 +100,23 @@ while : ; do
     fi
 
     rm -f "$entry"
+    break
 done
 
 if [ "$take_home_snapshot" = true ]; then
     while : ; do
-        files=$(find "/home/$dir" -mindepth 1 -maxdepth 1 -printf '%f\n')
-        if [ "$(echo "$files" | wc -l)" -le "$max_of_kind" ]; then
+        find "/home/$dir" -mindepth 1 -maxdepth 1 -print0 > /tmp/snapshots
+        count=$(cat /tmp/snapshots | get_count)
+        echo "home_count=$count"
+        if [ "$count" -le "$max_of_kind" ]; then
             break
         fi
-        oldest="$(echo "$files" | sort | head -n 1)"
+        oldest=$(cat /tmp/snapshots | get_first)
+        echo "home_oldest=$oldest"
         set -x
         btrfs subvol delete "/home/$dir/$oldest"
         set +x
+        break
     done
 fi
 
