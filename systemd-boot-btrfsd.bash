@@ -269,6 +269,9 @@ find "/$snapshots" -mindepth 2 -maxdepth 2 \
         initramfs="$booster"
     elif test -n "$dracut"; then
         initramfs="$dracut"
+    else
+        error "Error generating initramfs:"
+        error " mkinitcpio, booster and dracut failed.\n"
     fi
 
     sed -E \
