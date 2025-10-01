@@ -22,7 +22,7 @@ config="/etc/systemd-boot-btrfsd.conf"
 snapshots="/.snapshots/"
 lock="/var/lib/pacman/db.lck"
 
-if [ ! -f /etc/os-release ] || ! grep -q '^ID=arch' /etc/os-release; then
+if [[ ! -f /etc/os-release ]] || ! grep -q '^ID=arch' /etc/os-release; then
     error "Not running Arch Linux. Exiting...\n"
     exit 1
 fi
