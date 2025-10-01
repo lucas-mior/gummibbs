@@ -339,13 +339,13 @@ mkinitcpio=$(savefrom "/boot/mkinitcpio-$kernel_type.img")
 booster=$(savefrom    "/boot/booster-$kernel_type.img")
 dracut=$(savefrom     "/boot/dracut-$kernel_type.img")
 
-if test -z "$mkinitcpio" && test -z "$booster"; then
-    error "Error creating configuration for initramfs.\n"
+if test -z "$linux"; then
+    error "Error creating configuration for kernel.\n"
     exit $fatal_error
 fi
 
-if test -z "$linux"; then
-    error "Error creating configuration for kernel.\n"
+if test -z "$mkinitcpio" && test -z "$booster"; then
+    error "Error creating configuration for initramfs.\n"
     exit $fatal_error
 fi
 
