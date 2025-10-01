@@ -138,11 +138,11 @@ savefrom() {
 }
 
 get_kernel_type () {
-    if [[ $1 =~ "-lts$" ]]; then
+    if [[ $1 =~ "-lts" ]]; then
         kernel_type="linux-lts"
-    elif [[ $1 =~ "-hardened$" ]]; then
+    elif [[ $1 =~ "-hardened" ]]; then
         kernel_type="linux-hardened"
-    elif [[ $1 =~ "-zen$" ]]; then
+    elif [[ $1 =~ "-zen" ]]; then
         kernel_type="linux-zen"
     elif [[ $1 =~ "-arch" ]]; then
         kernel_type="linux"
