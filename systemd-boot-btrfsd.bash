@@ -144,6 +144,7 @@ get_kernel_type () {
         error "Unknown kernel type $kernel.\n"
         exit $fatal_error
     fi
+    echo "$kernel_type"
 }
 
 error "Generating boot entries for existing snapshots...\n"
