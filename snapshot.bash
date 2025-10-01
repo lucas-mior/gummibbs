@@ -64,7 +64,7 @@ case $kind in
 esac
 
 get_first () {
-    sort -z | head -z -n 1 | tr -d '\0' | awk -F'/' '{print $NF}'
+    sort -z | head -z -n 1 | tr -d '\0'
 }
 
 get_count () {
