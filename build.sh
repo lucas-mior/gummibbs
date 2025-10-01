@@ -28,7 +28,7 @@ case "$target" in
 "install")
     install -Dm755 ${program}  ${DESTDIR}${PREFIX}/bin/${program}
     install -Dm755 ${program2} ${DESTDIR}${PREFIX}/bin/${program2}
-    install -Dm644 ${common}   ${DESTDIR}${PREFIX}/bin/${common}
+    install -Dm644 ${common}   ${DESTDIR}${PREFIX}/lib/${common}
     install -Dm644 ${service}  ${DESTDIR}${PREFIX}/lib/systemd/system/${service}
     install -Dm644 ${hook}     ${DESTDIR}${PREFIX}/share/libalpm/hooks/${hook}
     ;;
