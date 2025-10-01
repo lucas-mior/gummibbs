@@ -12,12 +12,12 @@ fatal_error=2
 trap 'test "$?" = "$fatal_error" && exit $fatal_error' ERR
 
 subvol=$(btrfs subvol show / | awk '/Name:/{print $NF}')
-if echo "$subvol" | grep -Eq "^[0-9]{8}_[0-9]{6}"; then
+if [[ $subvol =~ ^[0-9]{8}_[0-9]{6} ]]; then
     error "Subvolume name matches date format. Exiting...\n"
     exit 1
 fi
 
-if echo "$subvol" | grep -Eq '([|/&\\$\(\)*+[]|])'; then
+if [[ $subvol =~ ([|/&\\$\(\)*+[]|]) ]]; then
     error "Subvolume name contains invalid chars: $subvol \n"
     exit 1
 fi
