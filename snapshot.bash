@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # shellcheck source=./systemd-boot-btrfsd-common.bash
-source /lib/systemd-boot-btrfs-common.bash
+source /lib/systemd-boot-btrfsd-common.bash
 
 if [ -z "$1" ]; then
     error "usage: $(basename "$0") <kind of snapshot>\n"
