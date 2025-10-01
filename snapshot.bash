@@ -75,7 +75,6 @@ get_files () {
     find "$dir" -mindepth 1 -maxdepth 1 -printf "%f\0"
 }
 
-
 while : ; do
     tmpfile=$(mktemp)
     get_files "$dir" > "$tmpfile"
