@@ -51,8 +51,12 @@ initramfs2=$(sed -nE -e '
              }' /proc/cmdline)
 
 if [[ "$initramfs" != "$initramfs2" ]]; then
-    error "Initramfs specified in boot entry ($initramfs)"
+    error "\nInitramfs specified in boot entry ($initramfs)"
     error " does not match the one in /proc/cmdline ($initramfs2)\n"
+    error "\nRemember that you also must set the initramfs.img prefix"
+    error " as the name of the initramfs generator to keep track of it.\n"
+    error "Generators available in arch linux are:\n"
+    error "mkinitcpio, booster and dracut.\n\n"
     exit 1
 fi
 
