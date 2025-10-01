@@ -49,7 +49,7 @@ for entry in /boot/loader/entries/*.conf; do
     snap=$(echo "$entry" \
            | sed -E -e 's|/boot/loader/entries/||' \
                     -e 's|.conf||')
-    if echo "$snap" | grep -Eqv "^[0-9]{8}_[0-9]{6}"; then
+    if [[ ! "$snap" =~ ^[0-9]{8}_[0-9]{6}$ ]]; then
         error "Ignoring entry $entry...\n"
         continue
     fi
@@ -121,13 +121,13 @@ savefrom() {
 }
 
 get_kernel_type () {
-    if echo "$1" | grep -Eq -- "-lts$"; then
+    if [[ $1 =~ "-lts$" ]]; then
         kernel_type="linux-lts"
-    elif echo "$1" | grep -Eq -- "-hardened$"; then
+    elif [[ $1 =~ "-hardened$" ]]; then
         kernel_type="linux-hardened"
-    elif echo "$1" | grep -Eq -- "-zen$"; then
+    elif [[ $1 =~ "-zen$" ]]; then
         kernel_type="linux-zen"
-    elif echo "$1" | grep -Eq -- "-arch"; then
+    elif [[ $1 =~ "-arch" ]]; then
         kernel_type="linux"
     else
         error "Unknown kernel type $1.\n"
