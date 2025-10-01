@@ -37,11 +37,6 @@ if test -n "$(find /boot/ -maxdepth 1 -iname "*.efi" -print -quit)"; then
     exit 1
 fi
 
-if command -v dracut >/dev/null 2>&1; then
-    error "Dracut detected. Exiting..."
-    exit 1
-fi
-
 if ! btrfs_subvol_show_root=$(btrfs subvol show /); then
     error "Error running btrfs subvol show /."
     error "Are your using btrfs?"

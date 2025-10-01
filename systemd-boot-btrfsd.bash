@@ -33,6 +33,25 @@ if test "$template2" != "$template"; then
     exit 1
 fi
 
+initramfs=$(awk '/^initrd .+(mkinitcpio|booster|dracut)/{print $NF}' \
+                "/boot/loader/entries/$template")
+if test -z "$initramfs"; then
+    error "You must set the initramfs prefix"
+    error " as the name of the initramfs generator to keep track of it.\n"
+fi
+initramfs2=$(sed -nE \
+                 -e '/initrd/{
+                         s/initrd=(.+(initramfs|mkinitcpio|booster|dracut).+\.img).+/\1/;
+                         s|\\|/|;
+                         p;
+                     }' /proc/cmdline)
+
+if [[ "$initramfs" != "$initramfs2" ]]; then
+    error "Initramfs specified in boot entry ($initramfs)"
+    error "does not match the one in /proc/cmdline ($initramfs2)\n"
+    exit 1
+fi
+
 subvol2=$(sed -En '/rootflags/{s/.*subvol=([^ ,;]*).*/\1/p}' \
                   "/boot/loader/entries/$template")
 
@@ -255,13 +274,13 @@ find "/$snapshots" -mindepth 2 -maxdepth 2 \
         -e "s|^title .+|title $kind/$snap|" \
         -e "s|subvol=$subvol|subvol=$subvol/.snapshots/$kind/$snap|" \
         -e "s|^linux .+/vmlinuz-linux.*|linux /$linux|" \
-        -e "s|^initrd .+/(initramfs|mkinitcpio|booster|dracut)/initrd /$initramfs|" \
+        -e "s|^initrd .+/(mkinitcpio|booster|dracut)|initrd /$initramfs|" \
         -e "s|//+|/|g" \
         "/boot/loader/entries/$template" \
         | tee "$entry"
 done
 
-unset kind snap snapshot linux mkinitcpio booster
+unset kind snap snapshot linux mkinitcpio booster dracut
 
 while true; do
 snap=$(inotifywait \
@@ -300,9 +319,10 @@ touch "$lock"
 
 kernel_type=$(get_kernel_type "$(uname -r)")
 
-linux=$(savefrom             "/boot/vmlinuz-$kernel_type")
-mkinitcpio=$(savefrom "/boot/initramfs-$kernel_type.img")
+linux=$(savefrom      "/boot/vmlinuz-$kernel_type")
+mkinitcpio=$(savefrom "/boot/mkinitcpio-$kernel_type.img")
 booster=$(savefrom    "/boot/booster-$kernel_type.img")
+dracut=$(savefrom    "/boot/dracut-$kernel_type.img")
 
 if test -z "$mkinitcpio" && test -z "$booster"; then
     error "Error creating configuration for initramfs.\n"
@@ -317,6 +337,7 @@ fi
 linux=$(echo "$linux"                         | sed 's|/boot/||')
 mkinitcpio=$(echo "$mkinitcpio" | sed 's|/boot/||')
 booster=$(echo "$booster"       | sed 's|/boot/||')
+dracut=$(echo "$dracut"       | sed 's|/boot/||')
 
 kind="$(echo "$kind" | sed 's|/||g')"
 
@@ -324,8 +345,9 @@ sed -E \
     -e "s|^title .+|title   $kind/$snapdate|;" \
     -e "s|subvol=$subvol|subvol=$subvol/$snapshots/$kind/$snapdate|" \
     -e "s|^linux .+/vmlinuz-linux.*|linux /$linux|" \
-    -e "s|^initrd .+/initramfs-linux.*\.img$|initrd /$mkinitcpio|" \
+    -e "s|^initrd .+/mkinitcpio-linux.*\.img$|initrd /$mkinitcpio|" \
     -e "s|^initrd .+/booster-linux.*\.img$|initrd /$booster|" \
+    -e "s|^initrd .+/dracut-linux.*\.img$|initrd /$dracut|" \
     -e "s|//+|/|g" \
     "/boot/loader/entries/$template" \
     | tee "/boot/loader/entries/$snapdate.conf"
