@@ -132,16 +132,16 @@ is_valid () {
 }
 
 get_kernel_type () {
-    if echo "$kernel" | grep -Eq -- "-lts$"; then
+    if echo "$1" | grep -Eq -- "-lts$"; then
         kernel_type="linux-lts"
-    elif echo "$kernel" | grep -Eq -- "-hardened$"; then
+    elif echo "$1" | grep -Eq -- "-hardened$"; then
         kernel_type="linux-hardened"
-    elif echo "$kernel" | grep -Eq -- "-zen$"; then
+    elif echo "$1" | grep -Eq -- "-zen$"; then
         kernel_type="linux-zen"
-    elif echo "$kernel" | grep -Eq -- "-arch"; then
+    elif echo "$1" | grep -Eq -- "-arch"; then
         kernel_type="linux"
     else
-        error "Unknown kernel type $kernel.\n"
+        error "Unknown kernel type $1.\n"
         exit $fatal_error
     fi
     echo "$kernel_type"

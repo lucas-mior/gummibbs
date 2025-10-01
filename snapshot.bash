@@ -121,7 +121,7 @@ fi
 
 snapdate="$(date +"%Y%m%d_%H%M%S")"
 
-if already=$(find "$snapshots" -mindepth 2 -maxdepth 2 -print0 \
+if already=$(find "/$snapshots" -mindepth 2 -maxdepth 2 -print0 \
              | grep -zFq -- "$snapdate"); then
     error "Snapshot for $snapdate already exists in $already.\n"
     exit 1
