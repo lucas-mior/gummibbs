@@ -74,14 +74,11 @@ get_count () {
 while : ; do
     find "$dir" -mindepth 1 -maxdepth 1 -print0 > /tmp/snapshots
 
-    count=$(cat /tmp/snapshots | get_count)
-    echo "count=$count"
-    if [ "$count" -le "$max_of_kind" ]; then
+    if [ "$(cat /tmp/snapshots | get_count)" -le "$max_of_kind" ]; then
         break
     fi
-    oldest=$(cat /tmp/snapshots | get_first)
-    echo "oldest=$oldest"
 
+    oldest=$(cat /tmp/snapshots | get_first)
     set -x
     btrfs subvol delete "$dir/$oldest"
     set +x
@@ -106,13 +103,10 @@ done
 if [ "$take_home_snapshot" = true ]; then
     while : ; do
         find "/home/$dir" -mindepth 1 -maxdepth 1 -print0 > /tmp/snapshots
-        count=$(cat /tmp/snapshots | get_count)
-        echo "home_count=$count"
-        if [ "$count" -le "$max_of_kind" ]; then
+        if [ "$(cat /tmp/snapshots | get_count)" -le "$max_of_kind" ]; then
             break
         fi
         oldest=$(cat /tmp/snapshots | get_first)
-        echo "home_oldest=$oldest"
         set -x
         btrfs subvol delete "/home/$dir/$oldest"
         set +x
