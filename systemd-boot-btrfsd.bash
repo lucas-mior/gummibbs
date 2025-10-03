@@ -12,6 +12,7 @@ fi
 
 script=$(basename "$0")
 set -E
+set -o pipefail
 fatal_error=2
 trap 'test "$?" = "$fatal_error" && exit $fatal_error' ERR
 
@@ -116,7 +117,7 @@ cleanup() {
 savefrom() {
     current=$1
     base=$(basename "$current" | sed -E 's/\..+//')
-    ext=$(basename "$current" | sed -E 's/[^.]+(\..+)?/\1/')
+    ext=$(basename "$current"  | sed -E 's/[^.]+(\..+)?/\1/')
 
     if [[ -z "$snapdate" ]]; then
         error "\$snapdate must be set.\n"
