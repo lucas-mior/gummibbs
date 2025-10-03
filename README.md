@@ -75,7 +75,8 @@ The important parts are:
     names for the initramfs.
 
 ### Configuring mkinitcpio
-Example without fallback image:
+Example without fallback image. Note that the `default_image` line is changed to
+keep track of the generator used.
 ```sh
 $ cat /etc/mkinitcpio.d/linux.preset
 ALL_kver="/boot/vmlinuz-linux"
