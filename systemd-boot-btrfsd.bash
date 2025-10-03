@@ -9,7 +9,7 @@ if [[ $path =~ ^/(usr|bin) ]]; then
 else
     path="./"
 fi
-if ! source $path/$common 2>/dev/null; then
+if ! source $path/$common; then
     >&2 printf "Error sourcing $common.\n"
     exit 1
 fi
