@@ -140,7 +140,7 @@ savefrom() {
     done
 
     conf="${base}-${snapdate}${ext}"
-    if cp -vf "$current" "/boot/$conf" >/dev/null; then
+    if cp -f "$current" "/boot/$conf" >/dev/null; then
         printf "/boot/$conf\n"
     fi
 }
@@ -203,11 +203,11 @@ find "/$snapshots" -mindepth 2 -maxdepth 2 \
         continue
     fi
 
-    if grep -q "\b$snapshot\b" /proc/mounts; then
+    if grep -Fq "$snapshot" /proc/mounts; then
         error "Snapshot $snapshot is mounted. This should not be the case.\n"
         exit 2
     fi
-    if grep -q "\b$snapshot/mnt/\b" /proc/mounts; then
+    if grep -Fq "$snapshot/mnt/" /proc/mounts; then
         error "Snapshot $snapshot is mounted. This should not be the case.\n"
         exit 2
     fi
