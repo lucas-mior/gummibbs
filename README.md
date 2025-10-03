@@ -98,3 +98,11 @@ ALL_kver="/boot/vmlinuz-linux"
 PRESETS=('default')
 default_image="/boot/mkinitcpio-linux.img"
 ```
+
+### Configuring dracut
+When creating the initramfs, use one of the following commands depending on
+which kernel you are using:
+```sh
+dracut /boot/dracut-linux.img
+dracut /boot/dracut-linux-lts.img
+```
