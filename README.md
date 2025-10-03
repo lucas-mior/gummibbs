@@ -68,7 +68,8 @@ Make sure that your default boot entry is correctly configured. An example
 is given (`entry_example.conf`). 
 The important parts are:
 - `rootflags=subvol=$SUBVOLNAME` is correct.
-  * `$SUBVOLNAME` must not match `([|/&\\$\(\)*+[]|])`
+  * `$SUBVOLNAME` must not match `grep -E ([|/&\\$\(\)*+[]|])`.
+  * Suggestion: Use `@`.
 - `initrd` must match the initramfs generator (mkinitcpio, booster or dracut)
   * By default, only booster creates the initramfs with its name. You will have
     to change the config for mkinitcpio or dracut in order to generate proper
