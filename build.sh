@@ -10,11 +10,11 @@ PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
 
 program="snapshot.bash"
-program2="systemd-boot-btrfsd.bash"
-common="systemd-boot-btrfsd-common.bash"
-service="systemd-boot-btrfsd.service"
-hook="systemd-boot-btrfsd.hook"
-config="systemd-boot-btrfsd.conf"
+program2="gummibbs.bash"
+common="gummibbs-common.bash"
+service="gummibbs.service"
+hook="gummibbs.hook"
+config="gummibbs.conf"
 
 echo "0$0"
 

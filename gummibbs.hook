@@ -2,9 +2,9 @@
 Operation = Install
 Operation = Upgrade
 Type = Package
-Target = systemd-boot-btrfs-snapshots
+Target = gummibbs
 
 [Action]
-Description = Enabling systemd-boot-btrfsd.
+Description = Enabling gummibbs.
 When = PostTransaction
-Exec = /usr/bin/systemctl enable --now systemd-boot-btrfsd.service
+Exec = /usr/bin/systemctl enable --now gummibbs.service
