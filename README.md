@@ -10,7 +10,7 @@ Only arch linux supported.
 - `systemd-boot-btrfsd.hook`: hook to enable service above
 
 ## How it works
-The `snapshot.bash` script will create snapshots separated as m̀anual, boot,
+The `snapshot.bash` script will create snapshots separated as manual, boot,
 hour, day, week and month. Each of those may have multiple snapshots saved as
 the current date in format `YYYYMMDD_HHMMSS`.  Btrfs snapshots allow restoring a
 subvolume to a previous state.  As `/boot` is on another partition, boot won't
