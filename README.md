@@ -1,13 +1,15 @@
-# systemd-boot-btrfs-snapshots
+# gummibbs
+*g*ummi **b**oot **b**trfs **s**napshots. As systemd-boot was gummiboot.
+
 Auto create systemd-boot entries when snapshots are created.
 Only arch linux supported.
 
 ## Parts
 - `build.sh`: installation script
 - `snapshot.bash`: create snapshot (meant to be run as cronjob)
-- `systemd-boot-btrfsd.bash`: wait for new snapshots and create boot entries
-- `systemd-boot-btrfsd.service`: service for the script above
-- `systemd-boot-btrfsd.hook`: hook to enable service above
+- `gummibbs.bash`: wait for new snapshots and create boot entries
+- `gummibbs.service`: service for the script above
+- `gummibbs.hook`: hook to enable service above
 
 ## How it works
 The `snapshot.bash` script will create snapshots separated as manual, boot,
@@ -15,7 +17,7 @@ hour, day, week and month. Each of those may have multiple snapshots saved as
 the current date in format `YYYYMMDD_HHMMSS`.  Btrfs snapshots allow restoring a
 subvolume to a previous state.  As `/boot` is on another partition, boot won't
 generally work since the kernel/initramfs expected by your restored root file
-system is another. So, the `systemd-boot-btrfsd.bash` script also copies the
+system is another. So, the `gummibbs.bash` script also copies the
 running kernel and initramfs with the matching name and creates the
 corresponding `.conf` boot entry. This implies you must have some spare space in
 `/boot`. But don't worry, if another copy already matches the running kernel,
@@ -50,18 +52,18 @@ old root file systems might fail for other reasons:
 ## Installation
 ### AUR
 ```sh
-yay -S systemd-boot-btrfs-snapshots
+yay -S gummibbs
 ```
 
 ### Manual
 ```sh
 # clone repository
-git clone https://github.com/lucas-mior/systemd-boot-btrfs-snapshots
-cd systemd-boot-btrfs-snapshots
+git clone https://github.com/lucas-mior/gummibbs
+cd gummibbs
 
 # install
 sudo ./build.sh install
-sudo systemctl enable --now systemd-boot-btrfsd.service
+sudo systemctl enable --now gummibbs.service
 
 # start making snapshots
 sudo snapshot.bash manual
@@ -71,7 +73,7 @@ sudo snapshot.bash manual
 This tool uses the directory `/.snapshots/$kind` to store the snapshots.  If you
 have old snapshots that you would like to be put in the same directory, you can
 do so, but beware that the `snapshot.bash` script **deletes** old snapshots
-based on how many you want to keep (`/etc/systemd-boot-btrfsd.conf`). Also
+based on how many you want to keep (`/etc/gummibbs.conf`). Also
 beware of the naming convention. The snapshot must be named
 `YYYYMMDD_HHMMSS` or things will break.
 
@@ -114,5 +116,5 @@ dracut /boot/dracut-linux-lts.img
 
 ## Configuration
 The amount of snapshots kept for each type is configured through
-`/etc/systemd-boot-btrfsd.conf`
+`/etc/gummibbs.conf`
 For automatic snapshots, look at Look at `crontab.example`.

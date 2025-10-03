@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # shellcheck disable=SC2001,SC2181
-# shellcheck source=./systemd-boot-btrfsd-common.bash
-common="systemd-boot-btrfsd-common.bash"
+# shellcheck source=./gummibbs-common.bash
+common="gummibbs-common.bash"
 path=$(realpath "$0")
 if [[ $path =~ ^/(usr|bin) ]]; then
     path="/lib/"
