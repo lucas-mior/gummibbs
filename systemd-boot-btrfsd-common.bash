@@ -56,7 +56,7 @@ if ! ls /sys/firmware/efi; then
 fi
 
 subvol_root=$(echo "$btrfs_subvol_show_root" | head -n 1)
-if [[ $subvol_root == "$snapshots" ]]; then
+if [[ $subvol_root =~ $snapshots ]]; then
     error "Snapshot mounted as root. Exiting...\n"
     exit 1
 fi
