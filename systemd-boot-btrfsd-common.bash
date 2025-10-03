@@ -43,6 +43,12 @@ if ! btrfs_subvol_show_root=$(btrfs subvol show /); then
     exit 2
 fi
 
+fs=$(awk '$2 == "/boot" {print $3}' /proc/mounts)
+if [[ "$fs" == "vfat" ]]; then
+    error "Error: /boot must be a vfat partition.\n"
+    exit 2
+fi
+
 subvol_root=$(echo "$btrfs_subvol_show_root" | head -n 1)
 if [[ $subvol_root == "$snapshots" ]]; then
     error "Snapshot mounted as root. Exiting...\n"

@@ -3,11 +3,15 @@
 # shellcheck disable=SC2001,SC2181
 # shellcheck source=./systemd-boot-btrfsd-common.bash
 common="systemd-boot-btrfsd-common.bash"
-if ! source ./$common 2>/dev/null; then
-    if ! source /lib/$common; then
-        >&2 printf "Error sourcing $common.\n"
-        exit
-    fi
+path=$(realpath "$0")
+if [[ $path =~ ^/(usr|bin) ]]; then
+    path="/lib/"
+else
+    path="./"
+fi
+if ! source $path/$common 2>/dev/null; then
+    >&2 printf "Error sourcing $common.\n"
+    exit 1
 fi
 
 if [[ -z "$1" ]]; then
