@@ -11,7 +11,7 @@ error () {
 valid_kinds=(manual boot hour day week month)
 is_valid () {
     for valid_kind in "${valid_kinds[@]}"; do
-        if [ "$valid_kind" = "$1" ]; then
+        if [[ "$valid_kind" == "$1" ]]; then
             return 0
         fi
     done
@@ -44,7 +44,7 @@ if ! btrfs_subvol_show_root=$(btrfs subvol show /); then
 fi
 
 subvol_root=$(echo "$btrfs_subvol_show_root" | head -n 1)
-if [[ $subvol_root ==  $snapshots ]]; then
+if [[ $subvol_root == "$snapshots" ]]; then
     error "Snapshot mounted as root. Exiting...\n"
     exit 1
 fi
