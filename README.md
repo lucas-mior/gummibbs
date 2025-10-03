@@ -6,13 +6,13 @@ Only arch linux supported.
 
 ## Parts
 - `build.sh`: installation script
-- `snapshot.bash`: create snapshot (meant to be run as cronjob)
+- `gummibbs-snapshot.bash`: create snapshot (meant to be run as cronjob)
 - `gummibbs.bash`: wait for new snapshots and create boot entries
 - `gummibbs.service`: service for the script above
 - `gummibbs.hook`: hook to enable service above
 
 ## How it works
-The `snapshot.bash` script will create snapshots separated as manual, boot,
+The `gummibbs-snapshot.bash` script will create snapshots separated as manual, boot,
 hour, day, week and month. Each of those may have multiple snapshots saved as
 the current date in format `YYYYMMDD_HHMMSS`.  Btrfs snapshots allow restoring a
 subvolume to a previous state.  As `/boot` is on another partition, boot won't
@@ -66,13 +66,13 @@ sudo ./build.sh install
 sudo systemctl enable --now gummibbs.service
 
 # start making snapshots
-sudo snapshot.bash manual
+sudo gummibbs-snapshot.bash manual
 ```
 
 ### Existing snapshots
 This tool uses the directory `/.snapshots/$kind` to store the snapshots.  If you
 have old snapshots that you would like to be put in the same directory, you can
-do so, but beware that the `snapshot.bash` script **deletes** old snapshots
+do so, but beware that the `gummibbs-snapshot.bash` script **deletes** old snapshots
 based on how many you want to keep (`/etc/gummibbs.conf`). Also
 beware of the naming convention. The snapshot must be named
 `YYYYMMDD_HHMMSS` or things will break.
