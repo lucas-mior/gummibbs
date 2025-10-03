@@ -51,7 +51,7 @@ git clone https://github.com/lucas-mior/systemd-boot-btrfs-snapshots
 cd systemd-boot-btrfs-snapshots
 
 # install
-sudo ./build install
+sudo ./build.sh install
 sudo systemctl enable --now systemd-boot-btrfsd.service
 
 # start making snapshots
