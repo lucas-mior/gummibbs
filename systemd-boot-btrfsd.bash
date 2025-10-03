@@ -164,8 +164,8 @@ error "Generating boot entries for existing snapshots...\n"
 find "/$snapshots" -mindepth 2 -maxdepth 2 \
 | while read -r snapshot; do
     snapshot=$(sed -E 's|//|/|; s|/$||;' <<< "$snapshot")
-    snap=$(awk -F'/' '{print $NF}' <<< "$snapshot")
-    kind=$(awk -F'/' '{print $(NF-1)}' <<< "$snapshot")
+    snap=$(awk -F'/' '{print $(NF)}'     <<< "$snapshot")
+    kind=$(awk -F'/' '{print $(NF-1)}'   <<< "$snapshot")
     entry="/boot/loader/entries/$snap.conf"
 
     if ! is_valid "$kind"; then
