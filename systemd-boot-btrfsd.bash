@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck disable=SC2001
+# shellcheck disable=SC2001,SC2181
 # shellcheck source=./systemd-boot-btrfsd-common.bash
 common="systemd-boot-btrfsd-common.bash"
 if ! source /lib/$common; then
@@ -21,13 +21,13 @@ if [[ $subvol =~ ([|/&\\$\(\)*+[]|]) ]]; then
 fi
 
 template=$(bootctl | awk '/Current Entry:/ {print $NF}')
-if ! test -e "/boot/loader/entries/$template"; then
+if ! [[ -e "/boot/loader/entries/$template" ]]; then
     error "Template boot entry '$template' does not exist.\n"
     exit 1
 fi
 
 template2=$(awk '/default/ {print $NF}' "/boot/loader/loader.conf")
-if test "$template2" != "$template"; then
+if [[ "$template2" != "$template" ]]; then
     error "Default boot option ($template2)"
     error " is not the booted one ($template).\n"
     exit 1
@@ -35,7 +35,7 @@ fi
 
 initramfs=$(awk '/^initrd .+(mkinitcpio|booster|dracut)/{print $NF}' \
                 "/boot/loader/entries/$template")
-if test -z "$initramfs"; then
+if [[ -z "$initramfs" ]]; then
     error "You must set the initramfs.img prefix"
     error " as the name of the initramfs generator to keep track of it.\n"
     exit 1
@@ -63,7 +63,7 @@ fi
 subvol2=$(sed -En '/rootflags/{s/.*subvol=([^ ,;]*).*/\1/p}' \
                   "/boot/loader/entries/$template")
 
-if test "$subvol" != "$subvol2"; then
+if [[ $subvol != "$subvol2" ]]; then
     error "Root subvolume ($subvol)"
     error " is not the one specified in $template ($subvol2).\n"
     exit 1
@@ -79,14 +79,14 @@ for entry in /boot/loader/entries/*.conf; do
     fi
 
     match=$(find "/$snapshots/" -maxdepth 2 -name "$snap" | wc -l)
-    if test "$match" = "0"; then
+    if [[ $match = "0" ]]; then
         error "$snap not found\n"
         rm -v "$entry"
         continue
     fi
 
     linux=$(awk '/^linux/{printf("%s/%s\n", "/boot", $NF);}' "$entry")
-    if ! test -e "$linux"; then
+    if ! [[ -e "$linux" ]]; then
         error "Referenced kernel $linux no longer exists. Deleting entry...\n"
         rm -v "$entry"
         continue
@@ -94,7 +94,7 @@ for entry in /boot/loader/entries/*.conf; do
 
     initrds=$(awk '/^initrd/{printf("%s/%s\n", "/boot", $NF);}' "$entry")
     for initrd in $initrds; do
-        if ! test -e "$initrd"; then
+        if ! [[ -e "$initrd" ]]; then
             error "Referenced initrd $initrd does not exist."
             error " Deleting entry...\n"
             rm -v "$entry"
@@ -118,18 +118,18 @@ savefrom() {
     base=$(basename "$current" | sed -E 's/\..+//')
     ext=$(basename "$current" | sed -E 's/[^.]+(\..+)?/\1/')
 
-    if test -z "$snapdate"; then
+    if [[ -z "$snapdate" ]]; then
         error "\$snapdate must be set.\n"
         exit 1
     fi
 
-    if ! test -s "$current"; then
+    if ! [[ -s "$current" ]]; then
         error "$current is empty.\n"
         return 0
     fi
 
     for file in /boot/"$base"-*; do
-        if ! test -e "$file"; then
+        if ! [[ -e "$file" ]]; then
             continue
         fi
         if diff "$file" "$current" >/dev/null 2>&1; then
@@ -174,7 +174,7 @@ find "/$snapshots" -mindepth 2 -maxdepth 2 \
         exit "$fatal_error"
     fi
 
-    if test -e "$entry"; then
+    if [[ -e "$entry" ]]; then
         error "$entry already exists.\n"
         continue
     fi
@@ -197,7 +197,7 @@ find "/$snapshots" -mindepth 2 -maxdepth 2 \
 
     snapdate=$snap
     linux=$(savefrom "/tmp/$script/vmlinuz-$kernel_type" | sed 's|/boot/||')
-    if test -z "$linux"; then
+    if [[ -z "$linux" ]]; then
         error "Error creating configuration for snapshotted kernel.\n"
         continue
     fi
@@ -247,21 +247,21 @@ find "/$snapshots" -mindepth 2 -maxdepth 2 \
     booster=$(savefrom    "/tmp/$script/booster-$kernel_type.img")
     dracut=$(savefrom     "/tmp/$script/dracut-$kernel_type.img")
 
-    if test -z "$mkinitcpio" && test -z "$booster" && test -z "$dracut"; then
+    if [[ -z "$mkinitcpio" ]] && [[ -z "$booster" ]] && [[ -z "$dracut" ]]; then
         error "\nError creating initramfs for $snapdate.\n\n"
         continue
     fi
 
-    if test -n "$mkinitcpio" \
-        && { test -n "$booster" || test -n "$dracut"; }; then
+    if [[ -n "$mkinitcpio" ]] \
+        && { [[ -n "$booster" ]] || [[ -n "$dracut" ]]; }; then
         error "Warning: Snapshot has more than one initramfs generator.\n"
         error "Defaulting to mkinitcpio...\n"
-    elif test -n "$booster" \
-        && { test -n "$mkinitcpio" || test -n "$dracut"; }; then
+    elif [[ -n "$booster" ]] \
+        && { [[ -n "$mkinitcpio" ]] || [[ -n "$dracut" ]]; }; then
         error "Warning: Snapshot has more than one initramfs generator.\n"
         error "Defaulting to booster...\n"
-    elif test -n "$dracut" \
-        && { test -n "$mkinitcpio" || test -n "$booster"; }; then
+    elif [[ -n "$dracut" ]] \
+        && { [[ -n "$mkinitcpio" ]] || [[ -n "$booster" ]]; }; then
         error "Warning: Snapshot has more than one initramfs generator.\n"
         error "Defaulting to dracut...\n"
     fi
@@ -270,11 +270,11 @@ find "/$snapshots" -mindepth 2 -maxdepth 2 \
     booster=$(sed 's|/boot/||' <<< "$booster")
     dracut=$(sed 's|/boot/||' <<< "$dracut")
 
-    if test -n "$mkinitcpio"; then
+    if [[ -n "$mkinitcpio" ]]; then
         initramfs="$mkinitcpio"
-    elif test -n "$booster"; then
+    elif [[ -n "$booster" ]]; then
         initramfs="$booster"
-    elif test -n "$dracut"; then
+    elif [[ -n "$dracut" ]]; then
         initramfs="$dracut"
     else
         error "Error generating initramfs:"
@@ -300,9 +300,9 @@ while true; do
 snap=$(inotifywait \
        --format "%w %f%n" \
        -e create "/$snapshots/"{manual,boot,hour,day,week,month})
-if test $? != 0 || test -z "$snap"; then
+if [[ $? != 0 ]] || [[ -z "$snap" ]]; then
     error "Error in inotifywait.\n"
-    exit 1
+    exit "$fatal_error"
 fi
 snap=$(sed -E "s|$snapshots||; s|/||g" <<< "$snap")
 
@@ -318,11 +318,11 @@ fi
 
 sleep 2
 n=0
-while test -e "$lock"; do
+while [[ -e "$lock" ]]; do
     error "$lock exists. Trying again in 5 seconds..."
     sleep 5
     n=$((n+1))
-    if test $n -gt 12; then
+    if [[ $n -gt 12 ]]; then
         error "Timeout waiting for $lock. Continuing..."
         continue
     fi
@@ -338,12 +338,12 @@ mkinitcpio=$(savefrom "/boot/mkinitcpio-$kernel_type.img" | sed 's|/boot/||')
 booster=$(savefrom    "/boot/booster-$kernel_type.img"    | sed 's|/boot/||')
 dracut=$(savefrom     "/boot/dracut-$kernel_type.img"     | sed 's|/boot/||')
 
-if test -z "$linux"; then
+if [[ -z "$linux" ]]; then
     error "Error creating configuration for kernel.\n"
     exit $fatal_error
 fi
 
-if test -z "$mkinitcpio" && test -z "$booster"; then
+if [[ -z "$mkinitcpio" ]] && [[ -z "$booster" ]]; then
     error "Error creating configuration for initramfs.\n"
     exit $fatal_error
 fi
