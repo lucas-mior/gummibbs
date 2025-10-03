@@ -325,7 +325,7 @@ while [[ -e "$lock" ]]; do
     n=$((n+1))
     if [[ $n -gt 12 ]]; then
         error "Timeout waiting for $lock. Continuing..."
-        continue
+        exit "$fatal_error"
     fi
 done
 
