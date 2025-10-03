@@ -9,7 +9,7 @@ if ! source /lib/$common; then
     fi
 fi
 
-if [ -z "$1" ]; then
+if [[ -z "$1" ]]; then
     error "usage: $(basename "$0") <kind of snapshot>\n"
     exit 1
 fi
