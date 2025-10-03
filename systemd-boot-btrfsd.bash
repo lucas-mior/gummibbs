@@ -71,9 +71,8 @@ fi
 
 error "Deleting boot entries with inexistent snapshots or kernels or initrds.\n"
 for entry in /boot/loader/entries/*.conf; do
-    snap=$(echo "$entry" \
-           | sed -E -e 's|/boot/loader/entries/||' \
-                    -e 's|.conf||')
+    snap=$(sed -E -e 's|/boot/loader/entries/||' \
+                  -e 's|.conf||' <<< "$entry")
     if [[ ! "$snap" =~ ^[0-9]{8}_[0-9]{6}$ ]]; then
         error "Ignoring entry $entry...\n"
         continue
@@ -164,9 +163,9 @@ get_kernel_type () {
 error "Generating boot entries for existing snapshots...\n"
 find "/$snapshots" -mindepth 2 -maxdepth 2 \
 | while read -r snapshot; do
-    snapshot=$(echo "$snapshot" | sed -E 's|//|/|; s|/$||;')
-    snap=$(echo "$snapshot" | awk -F'/' '{print $NF}')
-    kind=$(echo "$snapshot" | awk -F'/' '{print $(NF-1)}')
+    snapshot=$(sed -E 's|//|/|; s|/$||;' <<< "$snapshot")
+    snap=$(awk -F'/' '{print $NF}' <<< "$snapshot")
+    kind=$(awk -F'/' '{print $(NF-1)}' <<< "$snapshot")
     entry="/boot/loader/entries/$snap.conf"
 
     if ! is_valid "$kind"; then
