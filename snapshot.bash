@@ -62,7 +62,7 @@ while : ; do
     tmpfile=$(mktemp)
     get_files "$dir" > "$tmpfile"
 
-    if [ "$(get_count "$tmpfile")" -le "$max_of_kind" ]; then
+    if [[ $(get_count "$tmpfile") -le $max_of_kind ]]; then
         rm "$tmpfile"
         break
     fi
@@ -75,8 +75,8 @@ while : ; do
 
     entry="/boot/loader/entries/$oldest.conf"
 
-    linux_used="$(awk '/^linux/  {print $NF}' "$entry")"
-    initrd_used="$(awk '/^initrd/ {print $NF}' "$entry")"
+    linux_used=$(awk '/^linux/  {print $NF}' "$entry")
+    initrd_used=$(awk '/^initrd/ {print $NF}' "$entry")
 
     if [ -n "$linux_used" ]; then
         grep -FRq -- "$linux_used" /boot/loader/entries/ \
@@ -94,7 +94,7 @@ if [ "$take_home_snapshot" = true ]; then
     while : ; do
         tmpfile=$(mktemp)
         get_files "/home/$dir" > "$tmpfile"
-        if [ "$(get_count "$tmpfile")" -le "$max_of_kind" ]; then
+        if [[ $(get_count "$tmpfile") -le $max_of_kind ]]; then
             rm "$tmpfile"
             break
         fi
@@ -106,7 +106,7 @@ if [ "$take_home_snapshot" = true ]; then
     done
 fi
 
-snapdate="$(date +"%Y%m%d_%H%M%S")"
+snapdate=$(date +"%Y%m%d_%H%M%S")
 
 if already=$(find "/$snapshots" -mindepth 2 -maxdepth 2 -print0 \
              | grep -zF -- "$snapdate"); then
