@@ -38,6 +38,14 @@ When run, this script first does some housekeeping:
     you have more than one kernel save in `/lib/modules` (the most recent will
     be selected)
 
+## Gotchas
+While it is possible to restore the old kernel and regenerate the initramfs,
+old root file systems might fail for other reasons:
+- Partitions or btrfs subvolumes expected by `/etc/fstab` no longer exist
+  * consider adding `nofail` option
+  * use file system or partition LABELS, not UUIDs or (god forbid) kernel device
+    names
+
 ## Installation
 ### AUR
 ```sh
