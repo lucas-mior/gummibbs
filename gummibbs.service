@@ -8,7 +8,7 @@ StandardError=journal+console
 
 Environment="PATH=/sbin:/bin:/usr/sbin:/usr/bin"
 
-ExecStart=/usr/bin/systemd-boot-btrfsd.bash
+ExecStart=/usr/bin/gummibbs-daemon.bash
 
 [Install]
 WantedBy=multi-user.target

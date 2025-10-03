@@ -1,5 +1,5 @@
-@reboot  /usr/bin/snapshot.bash boot
-@hourly  /usr/bin/snapshot.bash hour
-@daily   /usr/bin/snapshot.bash day
-@weekly  /usr/bin/snapshot.bash week
-@monthly /usr/bin/snapshot.bash month
+@reboot  /usr/bin/gummibbs-snapshot.bash boot
+@hourly  /usr/bin/gummibbs-snapshot.bash hour
+@daily   /usr/bin/gummibbs-snapshot.bash day
+@weekly  /usr/bin/gummibbs-snapshot.bash week
+@monthly /usr/bin/gummibbs-snapshot.bash month
