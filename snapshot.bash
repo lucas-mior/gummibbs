@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -x
 # shellcheck source=./systemd-boot-btrfsd-common.bash
 common="systemd-boot-btrfsd-common.bash"
 if ! source /lib/$common; then
