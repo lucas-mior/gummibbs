@@ -30,11 +30,10 @@ When run, this script first does some housekeeping:
   deleted
 - Snapshots that have no corresponding boot entry get one. The kernel is
   recovered from the snapshot root and the initramfs is generated
-  * Only mkinitcpio and booster supported. If the snapshot contains both booster
-    and mkinitcpio installed, then the one in the default boot entry will be
-    selected. This could very well introduce a wrong boot entry, if you happened
-    to e.g. install booster but not use it, snapshot it, and then start using it
-    later.
+  * If the snapshot contains more than one initramfs generator installed, then
+    the one in the default boot entry will be selected. This could very well
+    introduce a wrong boot entry, if you happened to e.g.  install booster but
+    not use it, snapshot it, and then start using it later.
   * It is possible to get a wrong boot entry if the snapshot is messed up, or if
     you have more than one kernel save in `/lib/modules` (the most recent will
     be selected)
