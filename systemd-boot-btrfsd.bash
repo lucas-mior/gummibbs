@@ -304,7 +304,7 @@ if test $? != 0 || test -z "$snap"; then
     error "Error in inotifywait.\n"
     exit 1
 fi
-snap=$(echo "$snap" | sed -E "s|$snapshots||; s|/||g")
+snap=$(sed -E "s|$snapshots||; s|/||g" <<< "$snap")
 
 IFS=" " read -r kind snapdate <<END
 $snap
@@ -333,10 +333,10 @@ touch "$lock"
 
 kernel_type=$(get_kernel_type "$(uname -r)")
 
-linux=$(savefrom      "/boot/vmlinuz-$kernel_type")
-mkinitcpio=$(savefrom "/boot/mkinitcpio-$kernel_type.img")
-booster=$(savefrom    "/boot/booster-$kernel_type.img")
-dracut=$(savefrom     "/boot/dracut-$kernel_type.img")
+linux=$(savefrom      "/boot/vmlinuz-$kernel_type"        | sed 's|/boot/||')
+mkinitcpio=$(savefrom "/boot/mkinitcpio-$kernel_type.img" | sed 's|/boot/||')
+booster=$(savefrom    "/boot/booster-$kernel_type.img"    | sed 's|/boot/||')
+dracut=$(savefrom     "/boot/dracut-$kernel_type.img"     | sed 's|/boot/||')
 
 if test -z "$linux"; then
     error "Error creating configuration for kernel.\n"
@@ -347,11 +347,6 @@ if test -z "$mkinitcpio" && test -z "$booster"; then
     error "Error creating configuration for initramfs.\n"
     exit $fatal_error
 fi
-
-linux=$(echo "$linux"           | sed 's|/boot/||')
-mkinitcpio=$(echo "$mkinitcpio" | sed 's|/boot/||')
-booster=$(echo "$booster"       | sed 's|/boot/||')
-dracut=$(echo "$dracut"         | sed 's|/boot/||')
 
 kind="$(echo "$kind" | sed 's|/||g')"
 
