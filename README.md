@@ -33,7 +33,7 @@ When run, this script first does some housekeeping:
     introduce a wrong boot entry, if you happened to e.g.  install booster but
     not use it, snapshot it, and then start using it later.
   * It is possible to get a wrong boot entry if the snapshot is messed up, or if
-    you have more than one kernel save in `/lib/modules` (the most recent will
+    you have more than one kernel saved in `/lib/modules` (the most recent will
     be selected)
 
 ## Gotchas
