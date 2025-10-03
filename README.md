@@ -91,6 +91,8 @@ beware of the naming convention. The snapshot must be named
     Specific for this script to work correctly are the options:
     + `rootflags=subvol=$SUBVOLNAME`
     + `initrd $GENERATOR-$KERNEL_TYPE.img`
+- Unified kernel images are not supported and will cause the script to exit,
+  if detected
 
 ### mkinitcpio
 Example without fallback image. Note that the `default_image` line is changed to
