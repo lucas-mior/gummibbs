@@ -56,7 +56,8 @@ get_count () {
 
 get_files () {
     set -x
-    find "/$1" -mindepth 1 -maxdepth 1 -printf "%f\0"
+    find "$1" -mindepth 1 -maxdepth 1 -printf "%f\0"
+    set +x
 }
 
 while : ; do
@@ -115,6 +116,7 @@ if already=$(find "/$snapshots" -mindepth 2 -maxdepth 2 -print0 \
     error "Snapshot for $snapdate already exists in $already.\n"
     exit 1
 fi
+set +x
 
 btrfs subvolume snapshot / "$dir/$snapdate"
 if [[ "$take_home_snapshot" = true ]]; then
