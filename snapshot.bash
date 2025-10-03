@@ -55,7 +55,7 @@ get_count () {
 }
 
 get_files () {
-    find "$1" -mindepth 1 -maxdepth 1 -printf "%f\0"
+    find "/$1" -mindepth 1 -maxdepth 1 -printf "%f\0"
 }
 
 while : ; do
