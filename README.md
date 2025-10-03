@@ -60,8 +60,14 @@ sudo snapshot.bash manual
 
 ## Prerequisites
 - `/boot` must be `vfat` partition
-- Root filesystem must be a btrfs subvolume with a valid name (see below).
-- Initramfs filename must match the name of the generator used (see below).
+- Root filesystem must be a btrfs subvolume with a valid name:
+  * subvolume name must not match `grep -E ([|/&\\$\(\)*+[]|])`.
+  * suggestion: Use `@`.
+- Initramfs filename must match the name of the generator used:
+  * `$GENERATOR-$KERNEL_TYPE.img` must match the initramfs generator and kernel
+  * Note that by default, only booster creates the initramfs with its name. You
+    will have to change the config for mkinitcpio or dracut in order to generate
+    proper names for the initramfs.
 - Systemd-boot properly configured
 
 ## Configuration
@@ -71,14 +77,9 @@ configure automatic snapshots.
 
 Make sure that your default boot entry is correctly configured. An example
 is given (`entry_example.conf`). 
-The important parts are:
-- `rootflags=subvol=$SUBVOLNAME` is correct.
-  * `$SUBVOLNAME` must not match `grep -E ([|/&\\$\(\)*+[]|])`.
-  * Suggestion: Use `@`.
-- `initrd` must match the initramfs generator (mkinitcpio, booster or dracut)
-  * By default, only booster creates the initramfs with its name. You will have
-    to change the config for mkinitcpio or dracut in order to generate proper
-    names for the initramfs.
+Specific for this script to work correctly are the options:
+- `rootflags=subvol=$SUBVOLNAME`
+- `initrd $GENERATOR-$KERNEL_TYPE.img`
 
 ### Configuring mkinitcpio
 Example without fallback image. Note that the `default_image` line is changed to
