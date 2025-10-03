@@ -43,8 +43,10 @@ While it is possible to restore the old kernel and regenerate the initramfs,
 old root file systems might fail for other reasons:
 - Partitions or btrfs subvolumes expected by `/etc/fstab` no longer exist
   * consider adding `nofail` option
-  * use file system or partition LABELS, not UUIDs or (god forbid) kernel device
-    names
+  * use file system LABEL,
+    partition PARTLABEL,
+    or mapped device path (`/dev/mapper/name`),
+    but avoid UUIDs or (god forbid) generic block device path (e.g `/dev/sda1`)
 
 ## Installation
 ### AUR
