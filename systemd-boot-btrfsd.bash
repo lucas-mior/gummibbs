@@ -3,7 +3,7 @@
 # shellcheck disable=SC2001,SC2181
 # shellcheck source=./systemd-boot-btrfsd-common.bash
 common="systemd-boot-btrfsd-common.bash"
-if ! source ./$common; then
+if ! source ./$common 2>/dev/null; then
     if ! source /lib/$common; then
         >&2 printf "Error sourcing $common.\n"
         exit
