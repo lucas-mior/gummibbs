@@ -266,9 +266,9 @@ find "/$snapshots" -mindepth 2 -maxdepth 2 \
         error "Defaulting to dracut...\n"
     fi
 
-    mkinitcpio=$(echo "$mkinitcpio" | sed 's|/boot/||')
-    booster=$(echo    "$booster"    | sed 's|/boot/||')
-    dracut=$(echo     "$dracut"     | sed 's|/boot/||')
+    mkinitcpio=$(sed 's|/boot/||' <<< "$mkinitcpio")
+    booster=$(sed 's|/boot/||' <<< "$booster")
+    dracut=$(sed 's|/boot/||' <<< "$dracut")
 
     if test -n "$mkinitcpio"; then
         initramfs="$mkinitcpio"
