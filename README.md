@@ -65,5 +65,7 @@ look at `snapshot.bash`. Look at `crontab.example` as a possible way to
 configure automatic snapshots.
 
 Make sure that your default boot entry is correctly configured. An example
-is given (`entry_example.conf`). The important part is that
-`rootflags=subvol=$SUBVOLNAME` is correct.
+is given (`entry_example.conf`). 
+The important parts are:
+- `rootflags=subvol=$SUBVOLNAME` is correct.
+- `initrd` must match the initramfs generator (mkinitcpio, booster or dracut)
