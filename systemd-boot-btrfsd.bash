@@ -80,7 +80,7 @@ for entry in /boot/loader/entries/*.conf; do
     fi
 
     match=$(find "/$snapshots/" -maxdepth 2 -name "$snap" | wc -l)
-    if [[ $match = "0" ]]; then
+    if [[ $match -eq 0 ]]; then
         error "$snap not found\n"
         rm -v "$entry"
         continue
@@ -99,7 +99,7 @@ for entry in /boot/loader/entries/*.conf; do
             error "Referenced initrd $initrd does not exist."
             error " Deleting entry...\n"
             rm -v "$entry"
-            continue
+            break
         fi
     done
 done
