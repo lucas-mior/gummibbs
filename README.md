@@ -85,6 +85,11 @@ beware of the naming convention. The snapshot must be named
     will have to change the config for mkinitcpio or dracut in order to generate
     proper names for the initramfs.
 - Systemd-boot properly configured
+  * Make sure that your default boot entry is correctly configured. An example
+    is given (`entry_example.conf`).
+    Specific for this script to work correctly are the options:
+    + `rootflags=subvol=$SUBVOLNAME`
+    + `initrd $GENERATOR-$KERNEL_TYPE.img`
 
 ### mkinitcpio
 Example without fallback image. Note that the `default_image` line is changed to
@@ -108,9 +113,3 @@ dracut /boot/dracut-linux-lts.img
 The amount of snapshots kept for each type is configured through
 `/etc/systemd-boot-btrfsd.conf`
 For automatic snapshots, look at Look at `crontab.example`.
-
-Make sure that your default boot entry is correctly configured. An example
-is given (`entry_example.conf`). 
-Specific for this script to work correctly are the options:
-- `rootflags=subvol=$SUBVOLNAME`
-- `initrd $GENERATOR-$KERNEL_TYPE.img`
