@@ -59,10 +59,10 @@ sudo snapshot.bash manual
 ```
 
 ## Prerequisites
+- `/boot` must be `vfat` partition
 - Root filesystem must be a btrfs subvolume with a valid name (see below).
 - Initramfs filename must match the name of the generator used (see below).
 - Systemd-boot properly configured
-- `/boot` must be `vfat` partition
 
 ## Configuration
 You may want to set the number of entries kept for each snapshot interval type,
