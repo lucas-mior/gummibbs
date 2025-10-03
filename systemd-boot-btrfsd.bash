@@ -348,7 +348,7 @@ if test -z "$mkinitcpio" && test -z "$booster"; then
     exit $fatal_error
 fi
 
-kind="$(sed 's|/||g' <<< "$kind")"
+kind=$(sed 's|/||g' <<< "$kind")
 
 sed -E \
     -e "s|^title .+|title   $kind/$snapdate|;" \
