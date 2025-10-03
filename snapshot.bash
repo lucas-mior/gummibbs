@@ -2,8 +2,8 @@
 
 # shellcheck source=./systemd-boot-btrfsd-common.bash
 common="systemd-boot-btrfsd-common.bash"
-if ! source /lib/$common; then
-    if ! source ./$common; then
+if ! source ./$common; then
+    if ! source /lib/$common; then
         >&2 printf "Error sourcing $common.\n"
         exit
     fi
