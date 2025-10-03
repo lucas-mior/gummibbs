@@ -66,6 +66,14 @@ sudo systemctl enable --now systemd-boot-btrfsd.service
 sudo snapshot.bash manual
 ```
 
+### Existing snapshots
+This tool uses the directory `/.snapshots/$kind` to store the snapshots.  If you
+have old snapshots that you would like to be put in the same directory, you can
+do so, but beware that the `snapshot.bash` script **deletes** old snapshots
+based on how many you want to keep (`/etc/systemd-boot-btrfsd.conf`). Also
+beware of the naming convention. The snapshot must be named
+`YYYYMMDD_HHMMSS` or things will break.
+
 ## Prerequisites
 - `/boot` must be `vfat` partition
 - Root filesystem must be a btrfs subvolume with a valid name:
