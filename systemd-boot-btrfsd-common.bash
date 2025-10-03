@@ -37,12 +37,6 @@ if test -n "$(find /boot/ -maxdepth 1 -iname "*.efi" -print -quit)"; then
     exit 1
 fi
 
-if ! btrfs_subvol_show_root=$(btrfs subvol show /); then
-    error "Error running btrfs subvol show /."
-    error "Are your using btrfs?"
-    exit 2
-fi
-
 fs=$(awk '$2 == "/boot" {print $3}' /proc/mounts)
 if [[ "$fs" != "vfat" ]]; then
     error "Error: /boot must be a vfat partition.\n"
@@ -52,6 +46,12 @@ fi
 if ! ls /sys/firmware/efi; then
     error "/sys/firmware/efi directory not found.\n"
     error "Are you using UEFI?\n"
+    exit 2
+fi
+
+if ! btrfs_subvol_show_root=$(btrfs subvol show /); then
+    error "Error running btrfs subvol show /."
+    error "Are your using btrfs?"
     exit 2
 fi
 
