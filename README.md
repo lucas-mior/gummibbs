@@ -26,7 +26,7 @@ Consider adding `nofail` option to non critical partitions/subvolumes in
 `/etc/fstab` to avoid surprises.
 
 When run, this script first does some housekeeping:
-- Boot entries that point to an inexistent snapshot, kernel or initrd are
+- Boot entries that point to an nonexistent snapshot, kernel or initrd are
   deleted
 - Snapshots that have no corresponding boot entry get one. The kernel is
   recovered from the snapshot root and the initramfs is generated
