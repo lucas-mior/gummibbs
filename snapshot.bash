@@ -29,7 +29,7 @@ fi
 
 mkdir -p "$dir"
 
-if [ -e "$lock" ]; then
+if [[ -e "$lock" ]]; then
     error "$lock exists. You can't run this script while pacman is running.\n"
     exit 1
 fi
@@ -78,11 +78,11 @@ while : ; do
     linux_used=$(awk  '/^linux/  {print $NF}' "$entry")
     initrd_used=$(awk '/^initrd/ {print $NF}' "$entry")
 
-    if [ -n "$linux_used" ]; then
+    if [[ -n "$linux_used" ]]; then
         grep -FRq -- "$linux_used" /boot/loader/entries/ \
             || rm -vf "/boot/$linux_used"
     fi
-    if [ -n "$initrd_used" ]; then
+    if [[ -n "$initrd_used" ]]; then
         grep -FRq -- "$initrd_used" /boot/loader/entries/ \
             || rm -vf "/boot/$initrd_used"
     fi
@@ -90,7 +90,7 @@ while : ; do
     rm -vf "$entry"
 done
 
-if [ "$take_home_snapshot" = true ]; then
+if [[ "$take_home_snapshot" = true ]]; then
     while : ; do
         tmpfile=$(mktemp)
         get_files "/home/$dir" > "$tmpfile"
@@ -115,6 +115,6 @@ if already=$(find "/$snapshots" -mindepth 2 -maxdepth 2 -print0 \
 fi
 
 btrfs subvolume snapshot / "$dir/$snapdate"
-if [ "$take_home_snapshot" = true ]; then
+if [[ "$take_home_snapshot" = true ]]; then
     btrfs subvolume snapshot /home "/home/$snapshots/$kind/$snapdate"
 fi
