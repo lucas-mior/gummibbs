@@ -50,7 +50,7 @@ if ! ls /sys/firmware/efi > /dev/null; then
     exit 2
 fi
 
-if [ "$0" = "$BASH_SOURCE" ]; then
+if [[ "$0" == "$BASH_SOURCE" ]]; then
     exit 0
 fi
 
