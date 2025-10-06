@@ -44,7 +44,7 @@ if [[ "$fs" != "vfat" ]]; then
     exit 2
 fi
 
-if ! ls /sys/firmware/efi; then
+if ! ls /sys/firmware/efi > /dev/null; then
     error "/sys/firmware/efi directory not found.\n"
     error "Are you using UEFI?\n"
     exit 2
