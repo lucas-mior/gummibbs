@@ -50,6 +50,10 @@ if ! ls /sys/firmware/efi; then
     exit 2
 fi
 
+if [ "$0" = "$BASH_SOURCE" ]; then
+    exit 0
+fi
+
 if ! btrfs_subvol_show_root=$(btrfs subvol show /); then
     error "Error running btrfs subvol show /."
     error "Are your using btrfs?\n"
