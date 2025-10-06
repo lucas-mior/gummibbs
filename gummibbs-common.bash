@@ -52,7 +52,7 @@ fi
 
 if ! btrfs_subvol_show_root=$(btrfs subvol show /); then
     error "Error running btrfs subvol show /."
-    error "Are your using btrfs?"
+    error "Are your using btrfs?\n"
     exit 2
 fi
 
