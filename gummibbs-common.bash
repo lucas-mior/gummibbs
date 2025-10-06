@@ -1,3 +1,4 @@
+#!/bin/bash
 # shellcheck disable=SC2034
 
 export LC_ALL=C
