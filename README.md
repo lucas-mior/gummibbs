@@ -1,5 +1,5 @@
 # gummibbs
-**g**ummi **b**oot **b**trfs **s**napshots. As systemd-boot was gummiboot.
+**gummi** **b**oot **b**trfs **s**napshots. As systemd-boot was gummiboot.
 
 Auto create systemd-boot entries when snapshots are created.
 Only arch linux supported.
