@@ -66,7 +66,7 @@ if [[ $subvol_root =~ $snapshots ]]; then
     exit 1
 fi
 
-subvol=$(btrfs subvol show / | awk '/Name:/{print $NF}')
+subvol=$(echo "$btrfs_subvol_show_root" | awk '/Name:/{print $NF}')
 if [[ $subvol =~ [0-9]{8}_[0-9]{6} ]]; then
     error "Subvolume name matches date format. Exiting...\n"
     exit 1
