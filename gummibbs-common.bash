@@ -55,7 +55,7 @@ if [[ "$0" == "$BASH_SOURCE" ]]; then
 fi
 
 if ! btrfs_subvol_show_root=$(btrfs subvol show /); then
-    error "Error running btrfs subvol show /."
+    error "Error running btrfs subvol show /. "
     error "Are your using btrfs?\n"
     exit 2
 fi

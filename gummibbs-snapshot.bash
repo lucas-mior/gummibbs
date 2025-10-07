@@ -25,7 +25,7 @@ dir="/$snapshots/$kind"
 
 if ! btrfs_subvol_show_home=$(btrfs subvol show /home 2>&1); then
     error "Error running btrfs subvol show /home:\n"
-    error "$btrfs_subvol_show_home"
+    error "$btrfs_subvol_show_home\n"
     take_home_snapshot=false
 else
     mkdir -p "/home/$dir"
