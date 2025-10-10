@@ -16,8 +16,6 @@ service="gummibbs.service"
 hook="gummibbs.hook"
 config="gummibbs.conf"
 
-echo "0$0"
-
 case "$target" in
 "uninstall")
     rm -f ${DESTDIR}${PREFIX}/bin/${program}
