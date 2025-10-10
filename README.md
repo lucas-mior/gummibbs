@@ -7,7 +7,8 @@ Only arch linux supported.
 ## Parts
 - `build.sh`: installation script
 - `gummibbs-snapshot.bash`: create snapshot (meant to be run as cronjob)
-- `gummibbs.bash`: wait for new snapshots and create boot entries
+- `gummibbs-daemon.bash`: wait for new snapshots and create boot entries
+- `gummibbs-common.bash`: common stuff for the scripts above
 - `gummibbs.service`: service for the script above
 - `gummibbs.hook`: hook to enable service above
 
