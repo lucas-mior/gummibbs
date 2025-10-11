@@ -5,6 +5,6 @@ Type = Package
 Target = gummibbs
 
 [Action]
-Description = Enabling gummibbs.
+Description = Enabling gummibbs
 When = PostTransaction
 Exec = /usr/bin/systemctl enable --now gummibbs.service
