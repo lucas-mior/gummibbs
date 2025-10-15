@@ -19,7 +19,7 @@ is_valid () {
     return 1
 }
 
-config="/etc/systemd-boot-btrfsd.conf"
+config="/etc/gummibbs.conf"
 snapshots="/.snapshots/"
 lock="/var/lib/pacman/db.lck"
 
