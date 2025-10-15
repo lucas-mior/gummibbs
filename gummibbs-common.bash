@@ -50,6 +50,11 @@ if ! ls /sys/firmware/efi > /dev/null; then
     exit 2
 fi
 
+if [[ ! -e "$config" ]]; then
+    error "Configuration file $config does not exist.\n"
+    exit 2
+fi
+
 if [[ "$0" == "$BASH_SOURCE" ]]; then
     exit 0
 fi
