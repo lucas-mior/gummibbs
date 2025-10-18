@@ -29,7 +29,8 @@ if [[ ! -f /etc/os-release ]] || ! grep -q '^ID=arch' /etc/os-release; then
 fi
 
 if ! bootctl status >/dev/null 2>&1; then
-    error "Not using systemd-boot. Exiting...\n"
+    error "Error running bootctl status."
+    error "Are you using systemd-boot?"
     exit 1
 fi
 
