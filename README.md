@@ -22,8 +22,9 @@ root file system is another. So, the `gummibbs.bash` script also copies the
 running kernel and initramfs with the matching name and creates the
 corresponding `.conf` boot entry. This implies you must have some spare space in
 `/boot`. But don't worry, if another copy already matches the running kernel,
-only the entry will be adjusted, no extra copies needed. All this means that you
-*will* be able to boot into your system as it was months ago (but see
+only the entry will be adjusted, no extra copies needed (unless you are using
+[`booster`](https://github.com/anatol/booster/issues/309)).  All this means that
+you *will* be able to boot into your system as it was months ago (but see
 [gotchas](#Gotchas)).
 
 When run, this script first does some housekeeping:
