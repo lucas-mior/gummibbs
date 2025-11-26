@@ -3,8 +3,8 @@ Description=Create entries for btrfs snapshots as they are created
 
 [Service]
 Type=simple
-StandardOutput=journal+console
-StandardError=journal+console
+StandardOutput=journal
+StandardError=journal
 
 Environment="PATH=/sbin:/bin:/usr/sbin:/usr/bin"
 
