@@ -228,31 +228,31 @@ find "/$snapshots" -mindepth 2 -maxdepth 2 \
     mount -v --bind "$snapshot" "$snapshot"
     mount -v --bind "/tmp/" "$snapshot/mnt/" --mkdir
 
-    set -x
+    trace_on
     if ! arch-chroot "$snapshot" \
         mkinitcpio \
         -k "/mnt/$script/vmlinuz-$kernel_type" \
         -g "/mnt/$script/mkinitcpio-$kernel_type.img"; then
-        set +x
+        trace_off
         error "\nError generating initramfs using mkinitcpio.\n\n"
     fi
-    set -x
+    trace_on
     if ! arch-chroot "$snapshot" \
         booster build \
         --kernel-version "$kernel" \
         "/mnt/$script/booster-$kernel_type.img"; then
-        set +x
+        trace_off
         error "\nError generating initramfs using booster.\n\n"
     fi
-    set -x
+    trace_on
     if ! arch-chroot "$snapshot" \
         dracut \
         --kver "$kernel" \
         "/mnt/$script/dracut-$kernel_type.img"; then
-        set +x
+        trace_off
         error "\nError generating initramfs using dracut.\n\n"
     fi
-    set +x
+    trace_off
 
     umount -v "$snapshot/mnt"
     umount -v "$snapshot"
