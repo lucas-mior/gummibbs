@@ -107,6 +107,16 @@ for entry in /boot/loader/entries/*.conf; do
     done
 done
 
+error "Deleting orphaned initramfs images (mkinitcpio, booster, dracut).\n"
+for img in /boot/{mkinitcpio,booster,dracut}-*.img; do
+    [[ -e "$img" ]] || continue
+    trace_on
+    if ! grep -Fq "$(basename "$img")" /boot/loader/entries/*.conf 2>/dev/null; then
+        rm -v "$img"
+    fi
+    trace_off
+done
+
 cleanup() {
     grep -F "$snapshots" /proc/mounts \
         | while read -r fs; do
