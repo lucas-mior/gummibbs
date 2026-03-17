@@ -2,7 +2,10 @@
 # shellcheck disable=SC2034
 
 export LC_ALL=C
+
 shopt -s nullglob
+shopt -s expand_aliases
+
 alias trace_on='set -x'
 alias trace_off='{ set +x; } 2>/dev/null'
 
