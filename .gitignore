@@ -3,4 +3,4 @@ pkg
 *.tar
 gummibbs-git
 .SRCINFO
-temp_delete_me
+*temp_delete_me*
